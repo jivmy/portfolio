@@ -98,24 +98,32 @@ function App() {
 
   // Handle scroll to keep embed fixed until 1800px and animate text
   useEffect(() => {
+    const scrollThreshold = 1800; // 1800px
+    let lastScrollY = -1;
+    let lastEmbedPosition = null;
+    let lastTextTransform = null;
+    let lastTextOpacity = null;
+    let viewportHeight = window.innerHeight;
+
     const handleScroll = () => {
-      const scrollY = window.scrollY || window.pageYOffset;
-      const scrollThreshold = 1800; // 1800px
+      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
       
-      // Handle embed positioning
+      // Skip if scroll position hasn't changed significantly
+      if (Math.abs(scrollY - lastScrollY) < 0.5) return;
+      lastScrollY = scrollY;
+      
+      // Handle embed positioning - only update if position needs to change
       if (embedRef.current) {
-        if (scrollY < scrollThreshold) {
-          // Keep fixed until 1800px is scrolled - embed stays in place
-          embedRef.current.style.position = 'fixed';
-          embedRef.current.style.top = '0';
-          embedRef.current.style.left = '50%';
-          embedRef.current.style.transform = 'translateX(-50%)';
-        } else {
-          // After 1800px, make it scroll with the page
-          embedRef.current.style.position = 'absolute';
-          embedRef.current.style.top = `${scrollThreshold}px`;
-          embedRef.current.style.left = '50%';
-          embedRef.current.style.transform = 'translateX(-50%)';
+        const shouldBeFixed = scrollY < scrollThreshold;
+        const currentPosition = shouldBeFixed ? 'fixed' : 'absolute';
+        
+        if (lastEmbedPosition !== currentPosition) {
+          if (shouldBeFixed) {
+            embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
+          } else {
+            embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
+          }
+          lastEmbedPosition = currentPosition;
         }
       }
       
@@ -128,44 +136,88 @@ function App() {
         const scale = 1 - (progress * 0.5);
         
         // Move up: from 0 to -100vh (off screen)
-        const viewportHeight = window.innerHeight;
         const translateY = -progress * viewportHeight;
         
         // Opacity: from 1 to 0
         const opacity = 1 - progress;
         
-        bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
-        bioTextRef.current.style.opacity = opacity;
+        // Only update if values changed significantly (reduce DOM writes)
+        const newTransform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
+        if (lastTextTransform !== newTransform || Math.abs(opacity - (lastTextOpacity || 1)) > 0.01) {
+          bioTextRef.current.style.transform = newTransform;
+          bioTextRef.current.style.opacity = opacity;
+          lastTextTransform = newTransform;
+          lastTextOpacity = opacity;
+        }
       }
     };
 
-    // Use requestAnimationFrame for smoother scroll handling
+    const handleResize = () => {
+      viewportHeight = window.innerHeight;
+      handleScroll();
+    };
+
+    // Use throttled scroll handler to reduce work
     let ticking = false;
     const optimizedScrollHandler = () => {
       if (!ticking) {
+        ticking = true;
         window.requestAnimationFrame(() => {
           handleScroll();
           ticking = false;
         });
-        ticking = true;
       }
     };
 
     // Initial call
     handleScroll();
 
-    // Add scroll listener with optimization
-    // Use capture phase to ensure UnicornStudio can also detect scroll
-    window.addEventListener('scroll', optimizedScrollHandler, { passive: true, capture: false });
-    window.addEventListener('resize', handleScroll, { passive: true });
+    // Verify page is scrollable
+    const checkScrollable = () => {
+      const scrollHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+      );
+      const viewportHeight = window.innerHeight;
+      console.log('Scroll check:', { scrollHeight, viewportHeight, isScrollable: scrollHeight > viewportHeight });
+    };
+    checkScrollable();
+
+    // Add scroll listeners to multiple targets for better compatibility
+    const scrollOptions = { passive: true, capture: false };
+    const scrollHandler = () => {
+      console.log('Scroll event fired, scrollY:', window.scrollY);
+      optimizedScrollHandler();
+    };
     
-    // Also listen on document for better compatibility
-    document.addEventListener('scroll', optimizedScrollHandler, { passive: true, capture: false });
+    window.addEventListener('scroll', scrollHandler, scrollOptions);
+    document.addEventListener('scroll', scrollHandler, scrollOptions);
+    document.documentElement.addEventListener('scroll', scrollHandler, scrollOptions);
+    document.body.addEventListener('scroll', scrollHandler, scrollOptions);
+    
+    window.addEventListener('resize', () => {
+      handleResize();
+      checkScrollable();
+    }, { passive: true });
+
+    // Also use wheel event as fallback
+    const handleWheel = (e) => {
+      console.log('Wheel event fired');
+      optimizedScrollHandler();
+    };
+    window.addEventListener('wheel', handleWheel, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', optimizedScrollHandler);
-      document.removeEventListener('scroll', optimizedScrollHandler);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('scroll', scrollHandler);
+      document.removeEventListener('scroll', scrollHandler);
+      document.documentElement.removeEventListener('scroll', scrollHandler);
+      document.body.removeEventListener('scroll', scrollHandler);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
