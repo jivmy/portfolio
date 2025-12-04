@@ -13,69 +13,90 @@ function App() {
     const initializeUnicornStudio = () => {
       // Check if UnicornStudio is already available
       if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
-        // Ensure the embed element exists before initializing
-        if (embedRef.current) {
-          window.UnicornStudio.init();
+        // Ensure the embed element exists and is in the DOM before initializing
+        if (embedRef.current && embedRef.current.isConnected) {
+          try {
+            window.UnicornStudio.init();
+            // Force a scroll event to trigger UnicornStudio's scroll detection
+            window.dispatchEvent(new Event('scroll'));
+            return true;
+          } catch (error) {
+            console.error('Error initializing UnicornStudio:', error);
+          }
         }
-        return true;
       }
       return false;
     };
 
-    // Try to initialize immediately if already loaded
-    if (initializeUnicornStudio()) {
-      return;
-    }
+    // Wait for DOM to be fully ready
+    const waitForDOM = (callback) => {
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        // DOM is ready, but wait a bit more for React to finish rendering
+        setTimeout(callback, 100);
+      } else {
+        window.addEventListener('load', () => setTimeout(callback, 100));
+      }
+    };
 
-    // Check if script is already being loaded
-    const existingScript = document.querySelector('script[src*="unicornStudio.umd.js"]');
-    if (existingScript) {
-      // Wait for existing script to load
-      const checkInterval = setInterval(() => {
-        if (initializeUnicornStudio()) {
-          clearInterval(checkInterval);
-        }
-      }, 50);
-      
-      // Cleanup after 10 seconds if still not loaded
-      setTimeout(() => clearInterval(checkInterval), 10000);
-      return;
-    }
+    waitForDOM(() => {
+      // Try to initialize immediately if already loaded
+      if (initializeUnicornStudio()) {
+        return;
+      }
 
-    // Load the script
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
-    script.async = true;
-    script.crossOrigin = 'anonymous';
-    
-    script.onload = () => {
-      // Wait for DOM to be ready and ensure embed element exists
-      const initWithRetry = (attempts = 0) => {
-        if (attempts > 20) {
-          console.error('UnicornStudio initialization timeout');
-          return;
-        }
-        
-        if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function' && embedRef.current) {
-          try {
-            window.UnicornStudio.init();
-          } catch (error) {
-            console.error('Error initializing UnicornStudio:', error);
+      // Check if script is already being loaded
+      const existingScript = document.querySelector('script[src*="unicornStudio.umd.js"]');
+      if (existingScript) {
+        // Wait for existing script to load
+        const checkInterval = setInterval(() => {
+          if (initializeUnicornStudio()) {
+            clearInterval(checkInterval);
           }
-        } else {
-          setTimeout(() => initWithRetry(attempts + 1), 50);
-        }
+        }, 100);
+        
+        // Cleanup after 10 seconds if still not loaded
+        setTimeout(() => clearInterval(checkInterval), 10000);
+        return;
+      }
+
+      // Load the script
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      
+      script.onload = () => {
+        // Wait for DOM to be ready and ensure embed element exists
+        const initWithRetry = (attempts = 0) => {
+          if (attempts > 30) {
+            console.error('UnicornStudio initialization timeout');
+            return;
+          }
+          
+          if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function' && embedRef.current && embedRef.current.isConnected) {
+            try {
+              window.UnicornStudio.init();
+              // Force a scroll event to trigger UnicornStudio's scroll detection
+              window.dispatchEvent(new Event('scroll'));
+            } catch (error) {
+              console.error('Error initializing UnicornStudio:', error);
+            }
+          } else {
+            setTimeout(() => initWithRetry(attempts + 1), 100);
+          }
+        };
+        
+        // Wait a bit longer in production builds
+        setTimeout(() => initWithRetry(), 200);
       };
       
-      initWithRetry();
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load UnicornStudio script');
-      initAttempted.current = false; // Allow retry
-    };
-    
-    (document.head || document.body).appendChild(script);
+      script.onerror = () => {
+        console.error('Failed to load UnicornStudio script');
+        initAttempted.current = false; // Allow retry
+      };
+      
+      (document.head || document.body).appendChild(script);
+    });
   }, []);
 
   // Handle scroll to keep embed fixed until 1800px and animate text
@@ -137,11 +158,16 @@ function App() {
     handleScroll();
 
     // Add scroll listener with optimization
-    window.addEventListener('scroll', optimizedScrollHandler, { passive: true });
+    // Use capture phase to ensure UnicornStudio can also detect scroll
+    window.addEventListener('scroll', optimizedScrollHandler, { passive: true, capture: false });
     window.addEventListener('resize', handleScroll, { passive: true });
+    
+    // Also listen on document for better compatibility
+    document.addEventListener('scroll', optimizedScrollHandler, { passive: true, capture: false });
 
     return () => {
       window.removeEventListener('scroll', optimizedScrollHandler);
+      document.removeEventListener('scroll', optimizedScrollHandler);
       window.removeEventListener('resize', handleScroll);
     };
   }, []);
