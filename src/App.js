@@ -17,6 +17,7 @@ function App() {
         if (embedRef.current && embedRef.current.isConnected) {
           try {
             window.UnicornStudio.init();
+            console.log('UnicornStudio initialized successfully');
             // Small delay then trigger scroll to ensure UnicornStudio can detect it
             setTimeout(() => {
               window.scrollTo(0, 0);
@@ -26,62 +27,73 @@ function App() {
           } catch (error) {
             console.error('Error initializing UnicornStudio:', error);
           }
+        } else {
+          console.log('Embed element not ready yet');
         }
+      } else {
+        console.log('UnicornStudio not available yet');
       }
       return false;
     };
 
-    // Wait for both DOM and script to be ready
-    const waitAndInit = () => {
-      // Check if script is loaded
-      if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
-        // Script is loaded, wait for React to render
-        setTimeout(() => {
-          if (!initializeUnicornStudio()) {
-            // Retry a few times if element not ready
-            let attempts = 0;
-            const retryInterval = setInterval(() => {
-              attempts++;
-              if (initializeUnicornStudio() || attempts > 20) {
-                clearInterval(retryInterval);
-              }
-            }, 100);
-          }
-        }, 200);
-      } else {
-        // Script not loaded yet, wait for it
-        let attempts = 0;
-        const checkInterval = setInterval(() => {
-          attempts++;
-          if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
-            clearInterval(checkInterval);
-            setTimeout(() => {
-              if (!initializeUnicornStudio()) {
-                // Retry a few times if element not ready
-                let retryAttempts = 0;
-                const retryInterval = setInterval(() => {
-                  retryAttempts++;
-                  if (initializeUnicornStudio() || retryAttempts > 20) {
-                    clearInterval(retryInterval);
-                  }
-                }, 100);
-              }
-            }, 200);
-          } else if (attempts > 50) {
-            clearInterval(checkInterval);
-            console.error('UnicornStudio script not loaded after timeout');
-          }
-        }, 100);
-      }
-    };
-
-    // Wait for DOM to be ready
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      waitAndInit();
-    } else {
-      window.addEventListener('load', waitAndInit);
-      document.addEventListener('DOMContentLoaded', waitAndInit);
+    // Check if script already exists
+    const existingScript = document.querySelector('script[src*="unicornStudio"]');
+    if (existingScript) {
+      console.log('UnicornStudio script tag already exists');
+      // Wait for it to load
+      const checkInterval = setInterval(() => {
+        if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
+          clearInterval(checkInterval);
+          setTimeout(() => {
+            if (!initializeUnicornStudio()) {
+              let attempts = 0;
+              const retryInterval = setInterval(() => {
+                attempts++;
+                if (initializeUnicornStudio() || attempts > 30) {
+                  clearInterval(retryInterval);
+                }
+              }, 100);
+            }
+          }, 300);
+        }
+      }, 100);
+      
+      setTimeout(() => clearInterval(checkInterval), 10000);
+      return;
     }
+
+    // Load the script dynamically
+    console.log('Loading UnicornStudio script...');
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
+    script.async = false; // Load synchronously to ensure it's ready
+    script.crossOrigin = 'anonymous';
+    
+    script.onload = () => {
+      console.log('UnicornStudio script loaded');
+      // Wait for React to render the embed element
+      setTimeout(() => {
+        if (!initializeUnicornStudio()) {
+          let attempts = 0;
+          const retryInterval = setInterval(() => {
+            attempts++;
+            if (initializeUnicornStudio() || attempts > 30) {
+              clearInterval(retryInterval);
+              if (attempts > 30) {
+                console.error('Failed to initialize UnicornStudio after retries');
+              }
+            }
+          }, 100);
+        }
+      }, 300);
+    };
+    
+    script.onerror = (error) => {
+      console.error('Failed to load UnicornStudio script:', error);
+      initAttempted.current = false; // Allow retry
+    };
+    
+    document.head.appendChild(script);
   }, []);
 
   // Handle scroll to keep embed fixed until 1800px and animate text
