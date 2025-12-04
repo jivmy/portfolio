@@ -17,8 +17,11 @@ function App() {
         if (embedRef.current && embedRef.current.isConnected) {
           try {
             window.UnicornStudio.init();
-            // Force a scroll event to trigger UnicornStudio's scroll detection
-            window.dispatchEvent(new Event('scroll'));
+            // Small delay then trigger scroll to ensure UnicornStudio can detect it
+            setTimeout(() => {
+              window.scrollTo(0, 0);
+              window.dispatchEvent(new Event('scroll'));
+            }, 100);
             return true;
           } catch (error) {
             console.error('Error initializing UnicornStudio:', error);
@@ -28,75 +31,57 @@ function App() {
       return false;
     };
 
-    // Wait for DOM to be fully ready
-    const waitForDOM = (callback) => {
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        // DOM is ready, but wait a bit more for React to finish rendering
-        setTimeout(callback, 100);
+    // Wait for both DOM and script to be ready
+    const waitAndInit = () => {
+      // Check if script is loaded
+      if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
+        // Script is loaded, wait for React to render
+        setTimeout(() => {
+          if (!initializeUnicornStudio()) {
+            // Retry a few times if element not ready
+            let attempts = 0;
+            const retryInterval = setInterval(() => {
+              attempts++;
+              if (initializeUnicornStudio() || attempts > 20) {
+                clearInterval(retryInterval);
+              }
+            }, 100);
+          }
+        }, 200);
       } else {
-        window.addEventListener('load', () => setTimeout(callback, 100));
+        // Script not loaded yet, wait for it
+        let attempts = 0;
+        const checkInterval = setInterval(() => {
+          attempts++;
+          if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function') {
+            clearInterval(checkInterval);
+            setTimeout(() => {
+              if (!initializeUnicornStudio()) {
+                // Retry a few times if element not ready
+                let retryAttempts = 0;
+                const retryInterval = setInterval(() => {
+                  retryAttempts++;
+                  if (initializeUnicornStudio() || retryAttempts > 20) {
+                    clearInterval(retryInterval);
+                  }
+                }, 100);
+              }
+            }, 200);
+          } else if (attempts > 50) {
+            clearInterval(checkInterval);
+            console.error('UnicornStudio script not loaded after timeout');
+          }
+        }, 100);
       }
     };
 
-    waitForDOM(() => {
-      // Try to initialize immediately if already loaded
-      if (initializeUnicornStudio()) {
-        return;
-      }
-
-      // Check if script is already being loaded
-      const existingScript = document.querySelector('script[src*="unicornStudio.umd.js"]');
-      if (existingScript) {
-        // Wait for existing script to load
-        const checkInterval = setInterval(() => {
-          if (initializeUnicornStudio()) {
-            clearInterval(checkInterval);
-          }
-        }, 100);
-        
-        // Cleanup after 10 seconds if still not loaded
-        setTimeout(() => clearInterval(checkInterval), 10000);
-        return;
-      }
-
-      // Load the script
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      
-      script.onload = () => {
-        // Wait for DOM to be ready and ensure embed element exists
-        const initWithRetry = (attempts = 0) => {
-          if (attempts > 30) {
-            console.error('UnicornStudio initialization timeout');
-            return;
-          }
-          
-          if (window.UnicornStudio && typeof window.UnicornStudio.init === 'function' && embedRef.current && embedRef.current.isConnected) {
-            try {
-              window.UnicornStudio.init();
-              // Force a scroll event to trigger UnicornStudio's scroll detection
-              window.dispatchEvent(new Event('scroll'));
-            } catch (error) {
-              console.error('Error initializing UnicornStudio:', error);
-            }
-          } else {
-            setTimeout(() => initWithRetry(attempts + 1), 100);
-          }
-        };
-        
-        // Wait a bit longer in production builds
-        setTimeout(() => initWithRetry(), 200);
-      };
-      
-      script.onerror = () => {
-        console.error('Failed to load UnicornStudio script');
-        initAttempted.current = false; // Allow retry
-      };
-      
-      (document.head || document.body).appendChild(script);
-    });
+    // Wait for DOM to be ready
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      waitAndInit();
+    } else {
+      window.addEventListener('load', waitAndInit);
+      document.addEventListener('DOMContentLoaded', waitAndInit);
+    }
   }, []);
 
   // Handle scroll to keep embed fixed until 1800px and animate text
@@ -176,7 +161,8 @@ function App() {
     <div className="container">
       <div 
         ref={embedRef}
-        data-us-project="lHYBB7eHby32vZtR9jsO" 
+        data-us-project="lHYBB7eHby32vZtR9jsO"
+        data-us-production="true"
         className="unicorn-embed"
       />
       
