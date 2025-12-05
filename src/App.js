@@ -31,12 +31,15 @@ function App() {
     const scrollThreshold = 1800;
     let ticking = false;
 
+    // Reset scroll position on mount (especially important for mobile)
+    window.scrollTo(0, 0);
+
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
       
       requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
+        const scrollY = Math.max(0, window.scrollY || 0);
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
         // Embed positioning
@@ -61,7 +64,11 @@ function App() {
       });
     };
 
-    handleScroll();
+    // Small delay to ensure page is loaded before reading scroll
+    setTimeout(() => {
+      handleScroll();
+    }, 100);
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
 
