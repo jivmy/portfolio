@@ -29,10 +29,11 @@ function App() {
 
   useEffect(() => {
     let ticking = false;
+    let viewportHeight = window.innerHeight;
 
     const getScrollThreshold = () => {
-      // 50% of viewport height (50vh)
-      return window.innerHeight * 0.5;
+      // Use the most reliable viewport height for mobile
+      return Math.max(window.innerHeight, document.documentElement.clientHeight) * 0.5;
     };
 
     const handleScroll = () => {
@@ -40,7 +41,15 @@ function App() {
       ticking = true;
       
       requestAnimationFrame(() => {
-        const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+        // Get scroll position with multiple fallbacks for mobile
+        const scrollY = window.pageYOffset || 
+                       window.scrollY || 
+                       document.documentElement.scrollTop || 
+                       document.body.scrollTop || 
+                       0;
+        
+        // Update viewport height on scroll (for mobile address bar changes)
+        viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
         const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
@@ -54,7 +63,7 @@ function App() {
           const scale = 1 - easedProgress * 0.9;
           
           // Translate up with momentum
-          const translateY = -easedProgress * window.innerHeight;
+          const translateY = -easedProgress * viewportHeight;
           
           // Opacity from 1 to 0 (at 50% scroll = 50% opacity)
           const opacity = 1 - progress;
@@ -67,32 +76,34 @@ function App() {
       });
     };
 
+    // Initial call
     handleScroll();
     
-    // Scroll events
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    document.addEventListener('scroll', handleScroll, { passive: true });
+    // Scroll events - use capture phase for better mobile support
+    const scrollOptions = { passive: true, capture: false };
+    window.addEventListener('scroll', handleScroll, scrollOptions);
+    document.addEventListener('scroll', handleScroll, scrollOptions);
     
-    // Touch events for mobile
-    let touchStartY = 0;
-    const handleTouchStart = (e) => {
-      touchStartY = e.touches[0].clientY;
-    };
-    const handleTouchMove = () => {
+    // Resize handler - update viewport height
+    const handleResize = () => {
+      viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
       handleScroll();
     };
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
     
-    // Resize handler
-    window.addEventListener('resize', handleScroll, { passive: true });
+    // Orientation change for mobile
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
+        handleScroll();
+      }, 100);
+    });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
   }, []);
 
