@@ -29,53 +29,45 @@ function App() {
 
   useEffect(() => {
     const scrollThreshold = 1800;
-    let rafId = null;
+    let ticking = false;
 
-    const updateScroll = () => {
-      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
-      const progress = Math.min(scrollY / scrollThreshold, 1);
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
       
-      // Embed positioning
-      if (embedRef.current) {
-        if (scrollY < scrollThreshold) {
-          embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
-        } else {
-          embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const progress = Math.min(scrollY / scrollThreshold, 1);
+        
+        // Embed positioning
+        if (embedRef.current) {
+          if (scrollY < scrollThreshold) {
+            embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
+          } else {
+            embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
+          }
         }
-      }
-      
-      // Text animation
-      if (bioTextRef.current) {
-        const scale = 1 - progress * 0.5;
-        const translateY = -progress * window.innerHeight;
-        const opacity = 1 - progress;
-        bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
-        bioTextRef.current.style.opacity = opacity;
-      }
-    };
-
-    const handleEvent = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        updateScroll();
-        rafId = null;
+        
+        // Text animation
+        if (bioTextRef.current) {
+          const scale = 1 - progress * 0.5;
+          const translateY = -progress * window.innerHeight;
+          const opacity = 1 - progress;
+          bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
+          bioTextRef.current.style.opacity = opacity;
+        }
+        
+        ticking = false;
       });
     };
 
-    updateScroll();
-    
-    // Use a single handler for all events
-    window.addEventListener('scroll', handleEvent, { passive: true });
-    window.addEventListener('touchmove', handleEvent, { passive: true });
-    window.addEventListener('resize', handleEvent, { passive: true });
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
 
     return () => {
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId);
-      }
-      window.removeEventListener('scroll', handleEvent);
-      window.removeEventListener('touchmove', handleEvent);
-      window.removeEventListener('resize', handleEvent);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, []);
 
