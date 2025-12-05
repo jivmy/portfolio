@@ -53,16 +53,39 @@ function App() {
         const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
-        // Text animation with heavier easing for more weight
+        // Text animation with heavy spring curve for weight and momentum
         if (bioTextRef.current) {
-          // Stronger easing for more weight/momentum (ease-out quint - heavier deceleration)
-          const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
-          const easedProgress = easeOutQuint(progress);
+          // Heavy spring easing - simulates a heavy object with damping
+          // High damping (0.8), low frequency (0.3) for heavy, weighted feel
+          const heavySpring = (t) => {
+            const damping = 0.8; // High damping = heavy resistance
+            const frequency = 0.3; // Low frequency = slower, heavier movement
+            const omega = frequency * 2 * Math.PI;
+            const zeta = damping;
+            
+            if (zeta < 1) {
+              // Underdamped spring
+              const alpha = omega * zeta;
+              const beta = omega * Math.sqrt(1 - zeta * zeta);
+              return 1 - Math.exp(-alpha * t) * (Math.cos(beta * t) + (alpha / beta) * Math.sin(beta * t));
+            } else {
+              // Overdamped (heavy) - no oscillation, just heavy resistance
+              const alpha1 = omega * (zeta - Math.sqrt(zeta * zeta - 1));
+              const alpha2 = omega * (zeta + Math.sqrt(zeta * zeta - 1));
+              const c1 = alpha2 / (alpha2 - alpha1);
+              const c2 = -alpha1 / (alpha2 - alpha1);
+              return 1 - (c1 * Math.exp(-alpha1 * t) + c2 * Math.exp(-alpha2 * t));
+            }
+          };
           
-          // Scale from 1 to near 0 (0.1) with heavier feel
+          // Apply heavy spring with additional weight factor
+          const springProgress = heavySpring(progress);
+          const easedProgress = springProgress;
+          
+          // Scale from 1 to near 0 (0.1) with heavy spring feel
           const scale = 1 - easedProgress * 0.9;
           
-          // Translate up with more weight - stronger movement
+          // Translate up with heavy spring momentum
           const translateY = -easedProgress * viewportHeight;
           
           // Opacity from 1 to 0 (at 50% scroll = 50% opacity)
