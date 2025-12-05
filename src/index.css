@@ -32,6 +32,8 @@ body {
   height: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 body::-webkit-scrollbar {

@@ -31,43 +31,61 @@ function App() {
     const scrollThreshold = 1800;
     let ticking = false;
 
+    const updateScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      const progress = Math.min(scrollY / scrollThreshold, 1);
+      
+      // Embed positioning
+      if (embedRef.current) {
+        if (scrollY < scrollThreshold) {
+          embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
+        } else {
+          embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
+        }
+      }
+      
+      // Text animation
+      if (bioTextRef.current) {
+        const scale = 1 - progress * 0.5;
+        const translateY = -progress * window.innerHeight;
+        const opacity = 1 - progress;
+        bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
+        bioTextRef.current.style.opacity = opacity;
+      }
+    };
+
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
-      
       requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const progress = Math.min(scrollY / scrollThreshold, 1);
-        
-        // Embed positioning
-        if (embedRef.current) {
-          if (scrollY < scrollThreshold) {
-            embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
-          } else {
-            embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
-          }
-        }
-        
-        // Text animation
-        if (bioTextRef.current) {
-          const scale = 1 - progress * 0.5;
-          const translateY = -progress * window.innerHeight;
-          const opacity = 1 - progress;
-          bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
-          bioTextRef.current.style.opacity = opacity;
-        }
-        
+        updateScroll();
         ticking = false;
       });
     };
 
-    handleScroll();
+    // Also handle touchmove for Instagram/in-app browsers
+    const handleTouch = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateScroll();
+        ticking = false;
+      });
+    };
+
+    updateScroll();
+    
+    // Multiple event listeners for better compatibility
     window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchmove', handleTouch, { passive: true });
+    window.addEventListener('resize', updateScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchmove', handleTouch);
+      window.removeEventListener('resize', updateScroll);
     };
   }, []);
 
