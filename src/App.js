@@ -1,13 +1,21 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function App() {
   const embedRef = useRef(null);
   const bioTextRef = useRef(null);
+  const glassPanelsContainerRef = useRef(null);
+  const glassPanel1Ref = useRef(null);
+  const glassPanel2Ref = useRef(null);
+  const glassPanel3Ref = useRef(null);
+  const glassPanel4Ref = useRef(null);
+  
+  const [anchorMode, setAnchorMode] = useState('closest'); // 'closest', 'farthest', 'farthestX', 'farthestY'
 
   useEffect(() => {
+    // Initialize UnicornStudio
     if (window.UnicornStudio) {
       const init = () => {
-        if (embedRef.current && window.UnicornStudio?.init) {
+        if (window.UnicornStudio?.init) {
           window.UnicornStudio.init();
         }
       };
@@ -15,16 +23,17 @@ function App() {
       return;
     }
 
+    // Load UnicornStudio script
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
     script.onload = () => {
       setTimeout(() => {
-        if (embedRef.current && window.UnicornStudio?.init) {
+        if (window.UnicornStudio?.init) {
           window.UnicornStudio.init();
         }
       }, 100);
     };
-    document.head.appendChild(script);
+    (document.head || document.body).appendChild(script);
   }, []);
 
   useEffect(() => {
@@ -95,6 +104,62 @@ function App() {
           bioTextRef.current.style.opacity = opacity;
         }
         
+        // Show glass panels when scrolled to bottom
+        const scrollHeight = Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        );
+        const maxScroll = scrollHeight - viewportHeight;
+        const distanceFromBottom = maxScroll - scrollY;
+        
+        // Start animation at 0px from bottom (at bottom, progress = 1)
+        const animationStartDistance = 0;
+        const animationEndDistance = 800;
+        const animationRange = animationEndDistance - animationStartDistance;
+        // Animation progresses from 1 (at bottom, 0px) to 0 (800px from bottom)
+        const panelProgress = Math.max(0, Math.min(1, (animationEndDistance - distanceFromBottom) / animationRange));
+        
+        const panelOpacity = panelProgress;
+        const panelScale = panelProgress;
+        
+        const panels = [
+          glassPanel1Ref.current,
+          glassPanel2Ref.current,
+          glassPanel3Ref.current,
+          glassPanel4Ref.current
+        ];
+        
+        // Define transform-origin for each panel based on anchor mode
+        const transformOrigins = {
+          closest: ['100% 100%', '0% 100%', '100% 0%', '0% 0%'], // Panel 1, 2, 3, 4
+          farthest: ['0% 0%', '100% 0%', '0% 100%', '100% 100%'],
+          farthestX: ['0% 50%', '100% 50%', '0% 50%', '100% 50%'],
+          farthestY: ['50% 0%', '50% 0%', '50% 100%', '50% 100%']
+        };
+        
+        panels.forEach((panel, index) => {
+          if (panel) {
+            panel.style.opacity = panelOpacity;
+            // Don't override transform if animation is in progress
+            if (panel.dataset.animating !== 'true' && !panel.classList.contains('pressed')) {
+              panel.style.transform = `scale(${panelScale})`;
+            }
+            panel.style.transformOrigin = transformOrigins[anchorMode][index];
+            // Stagger the animation
+            panel.style.transitionDelay = panelProgress > 0 ? `${index * 0.075}s` : '0s';
+            // Make panels clickable when visible
+            panel.style.pointerEvents = panelOpacity > 0 ? 'auto' : 'none';
+          }
+        });
+        
+        if (glassPanelsContainerRef.current) {
+          glassPanelsContainerRef.current.style.opacity = panelOpacity;
+          glassPanelsContainerRef.current.style.transform = `translate(-50%, -50%) scale(${panelScale})`;
+        }
+        
         ticking = false;
       });
     };
@@ -128,7 +193,33 @@ function App() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
-  }, []);
+  }, [anchorMode]);
+
+  const handlePanelPress = (panelRef) => {
+    if (panelRef.current) {
+      panelRef.current.classList.add('pressed');
+    }
+  };
+
+  const handlePanelLeave = (panelRef) => {
+    if (panelRef.current) {
+      // Only cancel press state, don't trigger release animation
+      panelRef.current.classList.remove('pressed');
+    }
+  };
+
+  const handlePanelRelease = (panelRef) => {
+    if (panelRef.current) {
+      panelRef.current.classList.remove('pressed');
+      // Store that animation is in progress to prevent scroll handler from interfering
+      panelRef.current.dataset.animating = 'true';
+      panelRef.current.classList.add('release');
+      setTimeout(() => {
+        panelRef.current.classList.remove('release');
+        panelRef.current.dataset.animating = 'false';
+      }, 500);
+    }
+  };
 
   return (
     <div className="container">
@@ -142,6 +233,45 @@ function App() {
       <p ref={bioTextRef} className="bio-text">
         I am a design lead working on consumer Copilot at <a href="https://microsoft.ai/news/towards-humanist-superintelligence/" target="_blank" rel="noopener noreferrer" className="link">Microsoft AI</a>. Before, I was at Figma directing its inaugural <a href="https://www.firstround.com/ai/figma" target="_blank" rel="noopener noreferrer" className="link">AI model training</a> team, and before that I spent years <a href="https://www.youtube.com/watch?v=PG3tQYlZ6JQ" target="_blank" rel="noopener noreferrer" className="link">prototyping the metaverse</a> at Spatial.
       </p>
+      
+      <div ref={glassPanelsContainerRef} className="glass-panels-container">
+        <div 
+          ref={glassPanel1Ref} 
+          className="glass-panel" 
+          onMouseDown={() => handlePanelPress(glassPanel1Ref)}
+          onMouseUp={() => handlePanelRelease(glassPanel1Ref)}
+          onMouseLeave={() => handlePanelLeave(glassPanel1Ref)}
+          onTouchStart={() => handlePanelPress(glassPanel1Ref)}
+          onTouchEnd={() => handlePanelRelease(glassPanel1Ref)}
+        />
+        <div 
+          ref={glassPanel2Ref} 
+          className="glass-panel" 
+          onMouseDown={() => handlePanelPress(glassPanel2Ref)}
+          onMouseUp={() => handlePanelRelease(glassPanel2Ref)}
+          onMouseLeave={() => handlePanelLeave(glassPanel2Ref)}
+          onTouchStart={() => handlePanelPress(glassPanel2Ref)}
+          onTouchEnd={() => handlePanelRelease(glassPanel2Ref)}
+        />
+        <div 
+          ref={glassPanel3Ref} 
+          className="glass-panel" 
+          onMouseDown={() => handlePanelPress(glassPanel3Ref)}
+          onMouseUp={() => handlePanelRelease(glassPanel3Ref)}
+          onMouseLeave={() => handlePanelLeave(glassPanel3Ref)}
+          onTouchStart={() => handlePanelPress(glassPanel3Ref)}
+          onTouchEnd={() => handlePanelRelease(glassPanel3Ref)}
+        />
+        <div 
+          ref={glassPanel4Ref} 
+          className="glass-panel" 
+          onMouseDown={() => handlePanelPress(glassPanel4Ref)}
+          onMouseUp={() => handlePanelRelease(glassPanel4Ref)}
+          onMouseLeave={() => handlePanelLeave(glassPanel4Ref)}
+          onTouchStart={() => handlePanelPress(glassPanel4Ref)}
+          onTouchEnd={() => handlePanelRelease(glassPanel4Ref)}
+        />
+      </div>
     </div>
   );
 }
