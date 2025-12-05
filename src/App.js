@@ -53,16 +53,16 @@ function App() {
         const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
-        // Text animation with easing
+        // Text animation with heavier easing for more weight
         if (bioTextRef.current) {
-          // Easing function for momentum (ease-out cubic)
-          const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-          const easedProgress = easeOutCubic(progress);
+          // Stronger easing for more weight/momentum (ease-out quint - heavier deceleration)
+          const easeOutQuint = (t) => 1 - Math.pow(1 - t, 5);
+          const easedProgress = easeOutQuint(progress);
           
-          // Scale from 1 to near 0 (0.1)
+          // Scale from 1 to near 0 (0.1) with heavier feel
           const scale = 1 - easedProgress * 0.9;
           
-          // Translate up with momentum
+          // Translate up with more weight - stronger movement
           const translateY = -easedProgress * viewportHeight;
           
           // Opacity from 1 to 0 (at 50% scroll = 50% opacity)
