@@ -44,16 +44,6 @@ function App() {
         const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
-        // Embed positioning
-        if (embedRef.current) {
-          const scrollThreshold = getScrollThreshold();
-          if (scrollY < scrollThreshold) {
-            embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
-          } else {
-            embedRef.current.style.cssText = `position: absolute; top: ${scrollThreshold}px; left: 50%; transform: translateX(-50%);`;
-          }
-        }
-        
         // Text animation with easing
         if (bioTextRef.current) {
           // Easing function for momentum (ease-out cubic)
