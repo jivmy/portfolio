@@ -31,12 +31,8 @@ function App() {
     let ticking = false;
 
     const getScrollThreshold = () => {
-      const width = window.innerWidth;
-      if (width <= 480) return 800;
-      if (width <= 678) return 1000;
-      if (width <= 768) return 1200;
-      if (width <= 1024) return 1536;
-      return 1800;
+      // 50% of viewport height (50vh)
+      return window.innerHeight * 0.5;
     };
 
     const handleScroll = () => {
