@@ -29,7 +29,7 @@ function App() {
 
   useEffect(() => {
     const scrollThreshold = 1800;
-    let ticking = false;
+    let rafId = null;
 
     const updateScroll = () => {
       const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -54,38 +54,28 @@ function App() {
       }
     };
 
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
+    const handleEvent = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
         updateScroll();
-        ticking = false;
-      });
-    };
-
-    // Also handle touchmove for Instagram/in-app browsers
-    const handleTouch = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        updateScroll();
-        ticking = false;
+        rafId = null;
       });
     };
 
     updateScroll();
     
-    // Multiple event listeners for better compatibility
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    document.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('touchmove', handleTouch, { passive: true });
-    window.addEventListener('resize', updateScroll, { passive: true });
+    // Use a single handler for all events
+    window.addEventListener('scroll', handleEvent, { passive: true });
+    window.addEventListener('touchmove', handleEvent, { passive: true });
+    window.addEventListener('resize', handleEvent, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('touchmove', handleTouch);
-      window.removeEventListener('resize', updateScroll);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('scroll', handleEvent);
+      window.removeEventListener('touchmove', handleEvent);
+      window.removeEventListener('resize', handleEvent);
     };
   }, []);
 
