@@ -48,11 +48,21 @@ function App() {
           }
         }
         
-        // Text animation
+        // Text animation with easing
         if (bioTextRef.current) {
-          const scale = 1 - progress * 0.5;
-          const translateY = -progress * window.innerHeight;
+          // Easing function for momentum (ease-out cubic)
+          const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+          const easedProgress = easeOutCubic(progress);
+          
+          // Scale from 1 to near 0 (0.1)
+          const scale = 1 - easedProgress * 0.9;
+          
+          // Translate up with momentum
+          const translateY = -easedProgress * window.innerHeight;
+          
+          // Opacity from 1 to 0 (at 50% scroll = 50% opacity)
           const opacity = 1 - progress;
+          
           bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
           bioTextRef.current.style.opacity = opacity;
         }
