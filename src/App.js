@@ -28,19 +28,29 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const scrollThreshold = 1800;
     let ticking = false;
+
+    const getScrollThreshold = () => {
+      const width = window.innerWidth;
+      if (width <= 480) return 800;
+      if (width <= 678) return 1000;
+      if (width <= 768) return 1200;
+      if (width <= 1024) return 1536;
+      return 1800;
+    };
 
     const handleScroll = () => {
       if (ticking) return;
       ticking = true;
       
       requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
+        const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+        const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
         // Embed positioning
         if (embedRef.current) {
+          const scrollThreshold = getScrollThreshold();
           if (scrollY < scrollThreshold) {
             embedRef.current.style.cssText = 'position: fixed; top: 0; left: 50%; transform: translateX(-50%);';
           } else {
@@ -72,11 +82,30 @@ function App() {
     };
 
     handleScroll();
+    
+    // Scroll events
     window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Touch events for mobile
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const handleTouchMove = () => {
+      handleScroll();
+    };
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    
+    // Resize handler
     window.addEventListener('resize', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('resize', handleScroll);
     };
   }, []);
