@@ -74,7 +74,7 @@ function App() {
     let viewportHeight = window.innerHeight;
 
     const getScrollThreshold = () => {
-      return Math.max(window.innerHeight, document.documentElement.clientHeight) * 0.5;
+      return Math.max(window.innerHeight, document.documentElement.clientHeight) * 1.5;
     };
 
     const handleScroll = () => {
