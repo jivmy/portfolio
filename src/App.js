@@ -54,8 +54,8 @@ function App() {
       }
     };
     
-    // Check every 100ms
-    const heightCheckInterval = setInterval(updateEmbedHeight, 100);
+    // Check every 1 second
+    const heightCheckInterval = setInterval(updateEmbedHeight, 1000);
     
     // Also check on resize and orientation change
     window.addEventListener('resize', updateEmbedHeight);
