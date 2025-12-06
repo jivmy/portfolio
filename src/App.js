@@ -153,12 +153,6 @@ function App() {
         const panelOpacity = panelProgress;
         const panelScale = panelProgress;
         
-        // Adjust unicorn-embed height when near bottom to cover address bar space
-        if (embedRef.current) {
-          const isNearBottom = distanceFromBottom <= 200;
-          embedRef.current.style.height = isNearBottom ? '150vh' : '100vh';
-        }
-        
         const panels = [
           glassPanel1Ref.current,
           glassPanel2Ref.current,
