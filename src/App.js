@@ -43,32 +43,47 @@ function App() {
     // On mobile, check viewport height as frequently as possible and update unicorn-embed height
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
-    if (!isMobile || !embedRef.current) return;
+    if (!isMobile) return;
     
     let lastVh = window.innerHeight;
     let animationFrameId;
+    let isRunning = true;
     
     const updateEmbedHeight = () => {
+      if (!isRunning) return;
+      
       const currentVh = window.innerHeight;
-      if (currentVh !== lastVh && embedRef.current) {
+      if (embedRef.current && currentVh !== lastVh) {
         embedRef.current.style.height = '100vh';
         lastVh = currentVh;
       }
       // Continue checking on every frame
-      animationFrameId = requestAnimationFrame(updateEmbedHeight);
+      if (isRunning) {
+        animationFrameId = requestAnimationFrame(updateEmbedHeight);
+      }
     };
     
     // Start checking on every animation frame (typically 60fps)
     animationFrameId = requestAnimationFrame(updateEmbedHeight);
     
     // Also check on resize and orientation change
-    window.addEventListener('resize', updateEmbedHeight);
-    window.addEventListener('orientationchange', updateEmbedHeight);
+    const handleResize = () => {
+      if (embedRef.current) {
+        embedRef.current.style.height = '100vh';
+        lastVh = window.innerHeight;
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
     
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', updateEmbedHeight);
-      window.removeEventListener('orientationchange', updateEmbedHeight);
+      isRunning = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
   }, []);
 
