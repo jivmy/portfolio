@@ -16,6 +16,7 @@ html {
   height: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  box-shadow: inset 0 0 0 4px purple;
 }
 
 html::-webkit-scrollbar {
@@ -34,6 +35,7 @@ body {
   min-height: 100svh;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  box-shadow: inset 0 0 0 4px green;
 }
 
 body::-webkit-scrollbar {
@@ -50,6 +52,7 @@ body::-webkit-scrollbar {
   justify-content: center;
   position: relative;
   pointer-events: none;
+  box-shadow: inset 0 0 0 4px blue;
 }
 
 .unicorn-embed {
@@ -61,6 +64,7 @@ body::-webkit-scrollbar {
   height: 100%;
   z-index: 1;
   pointer-events: auto;
+  box-shadow: inset 0 0 0 4px red;
 }
 
 .unicorn-embed * {
