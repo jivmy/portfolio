@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 function App() {
   const embedRef = useRef(null);
@@ -8,12 +8,10 @@ function App() {
   const glassPanel2Ref = useRef(null);
   const glassPanel3Ref = useRef(null);
   const glassPanel4Ref = useRef(null);
-  const heightDebugRef = useRef(null);
   
-  const [anchorMode, setAnchorMode] = useState('closest'); // 'closest', 'farthest', 'farthestX', 'farthestY'
+  const anchorMode = 'closest';
 
   useEffect(() => {
-    // Fix viewport height for Instagram mobile browser
     const setViewportHeight = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -23,7 +21,6 @@ function App() {
     window.addEventListener('resize', setViewportHeight);
     window.addEventListener('orientationchange', setViewportHeight);
     
-    // Also handle scroll events that might affect viewport on mobile
     let lastHeight = window.innerHeight;
     const checkHeight = () => {
       if (window.innerHeight !== lastHeight) {
@@ -41,51 +38,37 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Set unicorn-embed to match container size (150vh) on all devices
-    const updateHeight = () => {
-      if (embedRef.current) {
-        // Match the blue container's height: 150vh
-        const containerHeight = window.innerHeight * 1.5; // 150vh
-        embedRef.current.style.setProperty('height', '150vh', 'important');
-        embedRef.current.style.setProperty('width', '100%', 'important');
-        
-        // Update debug display
-        if (heightDebugRef.current) {
-          heightDebugRef.current.textContent = `Unicorn: 100% x 150vh (${Math.round(containerHeight)}px)`;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    
+    if (isMobile && embedRef.current) {
+      const updateHeight = () => {
+        if (embedRef.current) {
+          embedRef.current.style.setProperty('height', '100vh', 'important');
         }
-      }
-    };
-    
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
-    
-    return () => {
-      window.removeEventListener('resize', updateHeight);
-    };
+      };
+      
+      updateHeight();
+      const heightInterval = setInterval(updateHeight, 100);
+      
+      return () => clearInterval(heightInterval);
+    }
   }, []);
 
   useEffect(() => {
-    // Initialize UnicornStudio
+    const initUnicornStudio = () => {
+      if (window.UnicornStudio?.init) {
+        window.UnicornStudio.init();
+      }
+    };
+
     if (window.UnicornStudio) {
-      const init = () => {
-        if (window.UnicornStudio?.init) {
-          window.UnicornStudio.init();
-        }
-      };
-      setTimeout(init, 100);
+      setTimeout(initUnicornStudio, 100);
       return;
     }
 
-    // Load UnicornStudio script
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js';
-    script.onload = () => {
-      setTimeout(() => {
-        if (window.UnicornStudio?.init) {
-          window.UnicornStudio.init();
-        }
-      }, 100);
-    };
+    script.onload = () => setTimeout(initUnicornStudio, 100);
     (document.head || document.body).appendChild(script);
   }, []);
 
@@ -94,7 +77,6 @@ function App() {
     let viewportHeight = window.innerHeight;
 
     const getScrollThreshold = () => {
-      // Use the most reliable viewport height for mobile
       return Math.max(window.innerHeight, document.documentElement.clientHeight) * 0.5;
     };
 
@@ -103,35 +85,28 @@ function App() {
       ticking = true;
       
       requestAnimationFrame(() => {
-        // Get scroll position with multiple fallbacks for mobile
         const scrollY = window.pageYOffset || 
                        window.scrollY || 
                        document.documentElement.scrollTop || 
                        document.body.scrollTop || 
                        0;
         
-        // Update viewport height on scroll (for mobile address bar changes)
         viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
         const scrollThreshold = getScrollThreshold();
         const progress = Math.min(scrollY / scrollThreshold, 1);
         
-        // Text animation with heavy spring curve for weight and momentum
         if (bioTextRef.current) {
-          // Heavy spring easing - simulates a heavy object with damping
-          // High damping (0.8), low frequency (0.3) for heavy, weighted feel
           const heavySpring = (t) => {
-            const damping = 0.8; // High damping = heavy resistance
-            const frequency = 0.3; // Low frequency = slower, heavier movement
+            const damping = 0.8;
+            const frequency = 0.3;
             const omega = frequency * 2 * Math.PI;
             const zeta = damping;
             
             if (zeta < 1) {
-              // Underdamped spring
               const alpha = omega * zeta;
               const beta = omega * Math.sqrt(1 - zeta * zeta);
               return 1 - Math.exp(-alpha * t) * (Math.cos(beta * t) + (alpha / beta) * Math.sin(beta * t));
             } else {
-              // Overdamped (heavy) - no oscillation, just heavy resistance
               const alpha1 = omega * (zeta - Math.sqrt(zeta * zeta - 1));
               const alpha2 = omega * (zeta + Math.sqrt(zeta * zeta - 1));
               const c1 = alpha2 / (alpha2 - alpha1);
@@ -140,24 +115,15 @@ function App() {
             }
           };
           
-          // Apply heavy spring with additional weight factor
           const springProgress = heavySpring(progress);
-          const easedProgress = springProgress;
-          
-          // Scale from 1 to near 0 (0.1) with heavy spring feel
-          const scale = 1 - easedProgress * 0.9;
-          
-          // Translate up with heavy spring momentum
-          const translateY = -easedProgress * viewportHeight;
-          
-          // Opacity from 1 to 0 (at 50% scroll = 50% opacity)
+          const scale = 1 - springProgress * 0.9;
+          const translateY = -springProgress * viewportHeight;
           const opacity = 1 - progress;
           
           bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
           bioTextRef.current.style.opacity = opacity;
         }
         
-        // Show glass panels when scrolled to bottom
         const scrollHeight = Math.max(
           document.body.scrollHeight,
           document.body.offsetHeight,
@@ -168,15 +134,8 @@ function App() {
         const maxScroll = scrollHeight - viewportHeight;
         const distanceFromBottom = maxScroll - scrollY;
         
-        // Start animation at 0px from bottom (at bottom, progress = 1)
-        const animationStartDistance = 0;
         const animationEndDistance = 800;
-        const animationRange = animationEndDistance - animationStartDistance;
-        // Animation progresses from 1 (at bottom, 0px) to 0 (800px from bottom)
-        const panelProgress = Math.max(0, Math.min(1, (animationEndDistance - distanceFromBottom) / animationRange));
-        
-        const panelOpacity = panelProgress;
-        const panelScale = panelProgress;
+        const panelProgress = Math.max(0, Math.min(1, (animationEndDistance - distanceFromBottom) / animationEndDistance));
         
         const panels = [
           glassPanel1Ref.current,
@@ -185,9 +144,8 @@ function App() {
           glassPanel4Ref.current
         ];
         
-        // Define transform-origin for each panel based on anchor mode
         const transformOrigins = {
-          closest: ['100% 100%', '0% 100%', '100% 0%', '0% 0%'], // Panel 1, 2, 3, 4
+          closest: ['100% 100%', '0% 100%', '100% 0%', '0% 0%'],
           farthest: ['0% 0%', '100% 0%', '0% 100%', '100% 100%'],
           farthestX: ['0% 50%', '100% 50%', '0% 50%', '100% 50%'],
           farthestY: ['50% 0%', '50% 0%', '50% 100%', '50% 100%']
@@ -195,44 +153,37 @@ function App() {
         
         panels.forEach((panel, index) => {
           if (panel) {
-            panel.style.opacity = panelOpacity;
-            // Don't override transform if animation is in progress
+            panel.style.opacity = panelProgress;
             if (panel.dataset.animating !== 'true' && !panel.classList.contains('pressed')) {
-              panel.style.transform = `scale(${panelScale})`;
+              panel.style.transform = `scale(${panelProgress})`;
             }
             panel.style.transformOrigin = transformOrigins[anchorMode][index];
-            // Stagger the animation
             panel.style.transitionDelay = panelProgress > 0 ? `${index * 0.075}s` : '0s';
-            // Make panels clickable when visible
-            panel.style.pointerEvents = panelOpacity > 0 ? 'auto' : 'none';
+            panel.style.pointerEvents = panelProgress > 0 ? 'auto' : 'none';
           }
         });
         
         if (glassPanelsContainerRef.current) {
-          glassPanelsContainerRef.current.style.opacity = panelOpacity;
-          glassPanelsContainerRef.current.style.transform = `translate(-50%, -50%) scale(${panelScale})`;
+          glassPanelsContainerRef.current.style.opacity = panelProgress;
+          glassPanelsContainerRef.current.style.transform = `translate(-50%, -50%) scale(${panelProgress})`;
         }
         
         ticking = false;
       });
     };
 
-    // Initial call
     handleScroll();
     
-    // Scroll events - use capture phase for better mobile support
     const scrollOptions = { passive: true, capture: false };
     window.addEventListener('scroll', handleScroll, scrollOptions);
     document.addEventListener('scroll', handleScroll, scrollOptions);
     
-    // Resize handler - update viewport height
     const handleResize = () => {
       viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
       handleScroll();
     };
     window.addEventListener('resize', handleResize, { passive: true });
     
-    // Orientation change for mobile
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         viewportHeight = Math.max(window.innerHeight, document.documentElement.clientHeight);
@@ -246,7 +197,7 @@ function App() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
-  }, [anchorMode]);
+  }, []);
 
   const handlePanelPress = (panelRef) => {
     if (panelRef.current) {
@@ -256,7 +207,6 @@ function App() {
 
   const handlePanelLeave = (panelRef) => {
     if (panelRef.current) {
-      // Only cancel press state, don't trigger release animation
       panelRef.current.classList.remove('pressed');
     }
   };
@@ -264,7 +214,6 @@ function App() {
   const handlePanelRelease = (panelRef) => {
     if (panelRef.current) {
       panelRef.current.classList.remove('pressed');
-      // Store that animation is in progress to prevent scroll handler from interfering
       panelRef.current.dataset.animating = 'true';
       panelRef.current.classList.add('release');
       setTimeout(() => {
@@ -325,8 +274,6 @@ function App() {
           onTouchEnd={() => handlePanelRelease(glassPanel4Ref)}
         />
       </div>
-      
-      <div ref={heightDebugRef} className="height-debug" />
     </div>
   );
 }

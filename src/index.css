@@ -16,7 +16,6 @@ html {
   height: 100%;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  box-shadow: inset 0 0 0 4px purple;
 }
 
 html::-webkit-scrollbar {
@@ -35,7 +34,6 @@ body {
   min-height: 100svh;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  box-shadow: inset 0 0 0 4px green;
 }
 
 body::-webkit-scrollbar {
@@ -52,7 +50,6 @@ body::-webkit-scrollbar {
   justify-content: center;
   position: relative;
   pointer-events: none;
-  box-shadow: inset 0 0 0 4px blue;
 }
 
 .unicorn-embed {
@@ -61,10 +58,9 @@ body::-webkit-scrollbar {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
-  height: 150vh;
+  height: 100%;
   z-index: 1;
   pointer-events: auto;
-  box-shadow: inset 0 0 0 4px red;
 }
 
 .unicorn-embed * {
@@ -216,18 +212,3 @@ body::-webkit-scrollbar {
     border-radius: 4px;
   }
 }
-
-.height-debug {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  color: red;
-  font-family: 'Andale Mono', monospace;
-  font-size: 16px;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 8px 12px;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
