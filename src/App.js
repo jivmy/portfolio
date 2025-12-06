@@ -12,6 +12,34 @@ function App() {
   const [anchorMode, setAnchorMode] = useState('closest'); // 'closest', 'farthest', 'farthestX', 'farthestY'
 
   useEffect(() => {
+    // Fix viewport height for Instagram mobile browser
+    const setViewportHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+    
+    // Also handle scroll events that might affect viewport on mobile
+    let lastHeight = window.innerHeight;
+    const checkHeight = () => {
+      if (window.innerHeight !== lastHeight) {
+        setViewportHeight();
+        lastHeight = window.innerHeight;
+      }
+    };
+    const heightCheckInterval = setInterval(checkHeight, 100);
+    
+    return () => {
+      window.removeEventListener('resize', setViewportHeight);
+      window.removeEventListener('orientationchange', setViewportHeight);
+      clearInterval(heightCheckInterval);
+    };
+  }, []);
+
+  useEffect(() => {
     // Initialize UnicornStudio
     if (window.UnicornStudio) {
       const init = () => {
