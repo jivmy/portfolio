@@ -83,13 +83,13 @@ body::-webkit-scrollbar {
   text-align: center;
   width: 542px;
   pointer-events: auto;
+  cursor: text;
   z-index: 2;
-  cursor: pointer;
-  transition: color 0.2s;
+  transition: background-color 0.2s;
 }
 
 .bio-text:hover {
-  color: #d3d3d3;
+  background-color: rgba(211, 211, 211, 0.3);
 }
 
 .bio-text .link {
