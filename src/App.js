@@ -40,31 +40,38 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // On mobile, check viewport height every few seconds and update unicorn-embed height
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    // Monitor and update unicorn-embed height on mobile when 100vh changes
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                    window.innerWidth <= 768;
     
-    if (!isMobile || !embedRef.current) return;
+    if (!isMobile) return;
     
-    let lastVh = window.innerHeight;
     const updateEmbedHeight = () => {
-      const currentVh = window.innerHeight;
-      if (currentVh !== lastVh && embedRef.current) {
-        embedRef.current.style.height = '100vh';
-        lastVh = currentVh;
+      if (embedRef.current) {
+        const actualVh = window.innerHeight;
+        embedRef.current.style.height = `${actualVh}px`;
       }
     };
     
-    // Check every 1 second
-    const heightCheckInterval = setInterval(updateEmbedHeight, 1000);
+    updateEmbedHeight();
     
-    // Also check on resize and orientation change
     window.addEventListener('resize', updateEmbedHeight);
     window.addEventListener('orientationchange', updateEmbedHeight);
     
+    // Check for height changes periodically (for address bar show/hide)
+    let lastHeight = window.innerHeight;
+    const checkHeight = () => {
+      if (window.innerHeight !== lastHeight) {
+        updateEmbedHeight();
+        lastHeight = window.innerHeight;
+      }
+    };
+    const heightCheckInterval = setInterval(checkHeight, 100);
+    
     return () => {
-      clearInterval(heightCheckInterval);
       window.removeEventListener('resize', updateEmbedHeight);
       window.removeEventListener('orientationchange', updateEmbedHeight);
+      clearInterval(heightCheckInterval);
     };
   }, []);
 
