@@ -40,7 +40,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // On mobile, check viewport height as fast as possible and update unicorn-embed height
+    // On mobile, check viewport height as frequently as possible and update unicorn-embed height
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
     if (!isMobile || !embedRef.current) return;
@@ -54,11 +54,11 @@ function App() {
         embedRef.current.style.height = '100vh';
         lastVh = currentVh;
       }
-      // Continue checking on next frame
+      // Continue checking on every frame
       animationFrameId = requestAnimationFrame(updateEmbedHeight);
     };
     
-    // Start checking immediately and continuously
+    // Start checking on every animation frame (typically 60fps)
     animationFrameId = requestAnimationFrame(updateEmbedHeight);
     
     // Also check on resize and orientation change
