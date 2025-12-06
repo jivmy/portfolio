@@ -48,11 +48,11 @@ function App() {
       const updateHeight = () => {
         if (embedRef.current) {
           const height = window.innerHeight;
-          embedRef.current.style.height = '100vh';
+          embedRef.current.style.setProperty('height', '100vh', 'important');
           
           // Update debug display
           if (heightDebugRef.current) {
-            heightDebugRef.current.textContent = `Height: ${height}px (100vh)`;
+            heightDebugRef.current.textContent = `Unicorn Height: ${height}px (100vh)`;
           }
         }
       };
