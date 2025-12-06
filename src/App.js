@@ -40,43 +40,23 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Check 100vh periodically on mobile and update unicorn-embed height if it changed
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                     (window.innerWidth <= 768);
+    // Set unicorn-embed height to 100vh every 100ms on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
-    if (!isMobile || !embedRef.current) return;
-    
-    // Get original 100vh value
-    const testDiv = document.createElement('div');
-    testDiv.style.height = '100vh';
-    testDiv.style.position = 'absolute';
-    testDiv.style.visibility = 'hidden';
-    document.body.appendChild(testDiv);
-    const originalVh = testDiv.offsetHeight;
-    document.body.removeChild(testDiv);
-    
-    let lastVh = originalVh;
-    
-    const checkVh = () => {
-      const testDiv = document.createElement('div');
-      testDiv.style.height = '100vh';
-      testDiv.style.position = 'absolute';
-      testDiv.style.visibility = 'hidden';
-      document.body.appendChild(testDiv);
-      const currentVh = testDiv.offsetHeight;
-      document.body.removeChild(testDiv);
+    if (isMobile && embedRef.current) {
+      const updateHeight = () => {
+        if (embedRef.current) {
+          embedRef.current.style.height = '100vh';
+        }
+      };
       
-      if (currentVh !== lastVh && embedRef.current) {
-        embedRef.current.style.height = `${currentVh}px`;
-        lastVh = currentVh;
-      }
-    };
-    
-    const vhCheckInterval = setInterval(checkVh, 100);
-    
-    return () => {
-      clearInterval(vhCheckInterval);
-    };
+      updateHeight();
+      const heightInterval = setInterval(updateHeight, 100);
+      
+      return () => {
+        clearInterval(heightInterval);
+      };
+    }
   }, []);
 
   useEffect(() => {
