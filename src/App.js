@@ -40,43 +40,42 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Monitor and update unicorn-embed height on mobile when 100vh changes
+    // Check 100vh periodically on mobile and update unicorn-embed height if it changed
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                    window.innerWidth <= 768;
+                     (window.innerWidth <= 768);
     
-    if (!isMobile) return;
+    if (!isMobile || !embedRef.current) return;
     
-    const updateEmbedHeight = () => {
-      if (embedRef.current) {
-        const actualVh = window.innerHeight;
-        // Set CSS variable and update inline style
-        document.documentElement.style.setProperty('--embed-height', `${actualVh}px`);
-        embedRef.current.style.height = `${actualVh}px`;
-        embedRef.current.style.setProperty('height', `${actualVh}px`, 'important');
+    // Get original 100vh value
+    const testDiv = document.createElement('div');
+    testDiv.style.height = '100vh';
+    testDiv.style.position = 'absolute';
+    testDiv.style.visibility = 'hidden';
+    document.body.appendChild(testDiv);
+    const originalVh = testDiv.offsetHeight;
+    document.body.removeChild(testDiv);
+    
+    let lastVh = originalVh;
+    
+    const checkVh = () => {
+      const testDiv = document.createElement('div');
+      testDiv.style.height = '100vh';
+      testDiv.style.position = 'absolute';
+      testDiv.style.visibility = 'hidden';
+      document.body.appendChild(testDiv);
+      const currentVh = testDiv.offsetHeight;
+      document.body.removeChild(testDiv);
+      
+      if (currentVh !== lastVh && embedRef.current) {
+        embedRef.current.style.height = `${currentVh}px`;
+        lastVh = currentVh;
       }
     };
     
-    // Initial update with small delay to ensure ref is set
-    setTimeout(updateEmbedHeight, 100);
-    updateEmbedHeight();
-    
-    window.addEventListener('resize', updateEmbedHeight);
-    window.addEventListener('orientationchange', updateEmbedHeight);
-    
-    // Check for height changes periodically (for address bar show/hide)
-    let lastHeight = window.innerHeight;
-    const checkHeight = () => {
-      if (window.innerHeight !== lastHeight) {
-        updateEmbedHeight();
-        lastHeight = window.innerHeight;
-      }
-    };
-    const heightCheckInterval = setInterval(checkHeight, 100);
+    const vhCheckInterval = setInterval(checkVh, 100);
     
     return () => {
-      window.removeEventListener('resize', updateEmbedHeight);
-      window.removeEventListener('orientationchange', updateEmbedHeight);
-      clearInterval(heightCheckInterval);
+      clearInterval(vhCheckInterval);
     };
   }, []);
 
