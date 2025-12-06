@@ -40,6 +40,32 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // Check viewport height on mobile and refresh if it changes
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                     (window.innerWidth <= 768);
+    
+    if (isMobile) {
+      let lastVh = window.innerHeight;
+      
+      const checkVhAndRefresh = () => {
+        const currentVh = window.innerHeight;
+        if (currentVh !== lastVh) {
+          // Viewport height changed, refresh the page
+          window.location.reload();
+        }
+        lastVh = currentVh;
+      };
+      
+      // Check every 2 seconds
+      const vhCheckInterval = setInterval(checkVhAndRefresh, 2000);
+      
+      return () => {
+        clearInterval(vhCheckInterval);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     // Initialize UnicornStudio
     if (window.UnicornStudio) {
       const init = () => {
