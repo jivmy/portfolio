@@ -85,11 +85,14 @@ body::-webkit-scrollbar {
   pointer-events: auto;
   cursor: text;
   z-index: 2;
-  transition: background-color 0.2s;
 }
 
-.bio-text:hover {
-  background-color: rgba(211, 211, 211, 0.3);
+.bio-text::selection {
+  background-color: rgba(211, 211, 211, 0.5);
+}
+
+.bio-text::-moz-selection {
+  background-color: rgba(211, 211, 211, 0.5);
 }
 
 .bio-text .link {
