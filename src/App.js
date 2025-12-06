@@ -43,7 +43,7 @@ function App() {
     if (isMobile && embedRef.current) {
       const updateHeight = () => {
         if (embedRef.current) {
-          embedRef.current.style.setProperty('height', '125vh', 'important');
+          embedRef.current.style.setProperty('height', '135vh', 'important');
         }
       };
       
