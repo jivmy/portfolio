@@ -84,6 +84,12 @@ body::-webkit-scrollbar {
   width: 542px;
   pointer-events: none;
   z-index: 2;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.bio-text:hover {
+  color: #d3d3d3;
 }
 
 .bio-text .link {
