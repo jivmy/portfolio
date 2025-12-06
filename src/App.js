@@ -40,29 +40,36 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Check viewport height on mobile and refresh if it changes
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
-                     (window.innerWidth <= 768);
+    // On mobile, check viewport height as fast as possible and update unicorn-embed height
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
-    if (isMobile) {
-      let lastVh = window.innerHeight;
-      
-      const checkVhAndRefresh = () => {
-        const currentVh = window.innerHeight;
-        if (currentVh !== lastVh) {
-          // Viewport height changed, refresh the page
-          window.location.reload();
-        }
+    if (!isMobile || !embedRef.current) return;
+    
+    let lastVh = window.innerHeight;
+    let animationFrameId;
+    
+    const updateEmbedHeight = () => {
+      const currentVh = window.innerHeight;
+      if (currentVh !== lastVh && embedRef.current) {
+        embedRef.current.style.height = '100vh';
         lastVh = currentVh;
-      };
-      
-      // Check every 2 seconds
-      const vhCheckInterval = setInterval(checkVhAndRefresh, 2000);
-      
-      return () => {
-        clearInterval(vhCheckInterval);
-      };
-    }
+      }
+      // Continue checking on next frame
+      animationFrameId = requestAnimationFrame(updateEmbedHeight);
+    };
+    
+    // Start checking immediately and continuously
+    animationFrameId = requestAnimationFrame(updateEmbedHeight);
+    
+    // Also check on resize and orientation change
+    window.addEventListener('resize', updateEmbedHeight);
+    window.addEventListener('orientationchange', updateEmbedHeight);
+    
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', updateEmbedHeight);
+      window.removeEventListener('orientationchange', updateEmbedHeight);
+    };
   }, []);
 
   useEffect(() => {
