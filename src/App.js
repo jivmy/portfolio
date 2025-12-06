@@ -41,27 +41,57 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Set unicorn-embed height to 100vh every 100ms on mobile
+    // Match unicorn-embed container to actual UnicornStudio content size on mobile
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
     if (isMobile && embedRef.current) {
       const updateHeight = () => {
         if (embedRef.current) {
-          const height = window.innerHeight;
-          embedRef.current.style.setProperty('height', '100vh', 'important');
+          // Find the actual rendered UnicornStudio content
+          // UnicornStudio typically creates an iframe or canvas element
+          const unicornContent = embedRef.current.querySelector('iframe, canvas, video') || 
+                                embedRef.current.firstElementChild;
           
-          // Update debug display
-          if (heightDebugRef.current) {
-            heightDebugRef.current.textContent = `Unicorn Height: ${height}px (100vh)`;
+          if (unicornContent && unicornContent.offsetHeight > 0) {
+            // Get the actual rendered dimensions of the content
+            const contentHeight = unicornContent.offsetHeight || unicornContent.clientHeight;
+            const contentWidth = unicornContent.offsetWidth || unicornContent.clientWidth;
+            
+            // Match container height to content, but keep width at 100% for responsiveness
+            embedRef.current.style.setProperty('height', `${contentHeight}px`, 'important');
+            embedRef.current.style.setProperty('width', '100%', 'important');
+            
+            // Update debug display
+            if (heightDebugRef.current) {
+              heightDebugRef.current.textContent = `Unicorn: ${Math.round(contentWidth)}x${Math.round(contentHeight)}px`;
+            }
+          } else {
+            // Fallback: use viewport height if content hasn't rendered yet
+            const height = window.innerHeight;
+            embedRef.current.style.setProperty('height', '100vh', 'important');
+            embedRef.current.style.setProperty('width', '100%', 'important');
+            
+            if (heightDebugRef.current) {
+              heightDebugRef.current.textContent = `Unicorn Height: ${height}px (100vh) - waiting for content`;
+            }
           }
         }
       };
       
+      // Wait a bit for UnicornStudio to initialize and render
+      const initialDelay = setTimeout(updateHeight, 500);
+      
       updateHeight();
-      const heightInterval = setInterval(updateHeight, 100);
+      // Check periodically until content loads, then less frequently
+      const heightInterval = setInterval(updateHeight, 200);
+      
+      // Also listen for resize events
+      window.addEventListener('resize', updateHeight);
       
       return () => {
+        clearTimeout(initialDelay);
         clearInterval(heightInterval);
+        window.removeEventListener('resize', updateHeight);
       };
     }
   }, []);
