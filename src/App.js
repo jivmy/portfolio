@@ -40,50 +40,31 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // On mobile, check viewport height as frequently as possible and update unicorn-embed height
+    // On mobile, check viewport height every few seconds and update unicorn-embed height
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
-    if (!isMobile) return;
+    if (!isMobile || !embedRef.current) return;
     
     let lastVh = window.innerHeight;
-    let animationFrameId;
-    let isRunning = true;
-    
     const updateEmbedHeight = () => {
-      if (!isRunning) return;
-      
       const currentVh = window.innerHeight;
-      if (embedRef.current && currentVh !== lastVh) {
+      if (currentVh !== lastVh && embedRef.current) {
         embedRef.current.style.height = '100vh';
         lastVh = currentVh;
       }
-      // Continue checking on every frame
-      if (isRunning) {
-        animationFrameId = requestAnimationFrame(updateEmbedHeight);
-      }
     };
     
-    // Start checking on every animation frame (typically 60fps)
-    animationFrameId = requestAnimationFrame(updateEmbedHeight);
+    // Check every 100ms
+    const heightCheckInterval = setInterval(updateEmbedHeight, 100);
     
     // Also check on resize and orientation change
-    const handleResize = () => {
-      if (embedRef.current) {
-        embedRef.current.style.height = '100vh';
-        lastVh = window.innerHeight;
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener('resize', updateEmbedHeight);
+    window.addEventListener('orientationchange', updateEmbedHeight);
     
     return () => {
-      isRunning = false;
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      clearInterval(heightCheckInterval);
+      window.removeEventListener('resize', updateEmbedHeight);
+      window.removeEventListener('orientationchange', updateEmbedHeight);
     };
   }, []);
 
