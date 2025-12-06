@@ -213,3 +213,17 @@ body::-webkit-scrollbar {
   }
 }
 
+.height-debug {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: red;
+  font-family: 'Andale Mono', monospace;
+  font-size: 16px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+

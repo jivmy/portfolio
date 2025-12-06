@@ -8,6 +8,7 @@ function App() {
   const glassPanel2Ref = useRef(null);
   const glassPanel3Ref = useRef(null);
   const glassPanel4Ref = useRef(null);
+  const heightDebugRef = useRef(null);
   
   const [anchorMode, setAnchorMode] = useState('closest'); // 'closest', 'farthest', 'farthestX', 'farthestY'
 
@@ -46,7 +47,13 @@ function App() {
     if (isMobile && embedRef.current) {
       const updateHeight = () => {
         if (embedRef.current) {
+          const height = window.innerHeight;
           embedRef.current.style.height = '100vh';
+          
+          // Update debug display
+          if (heightDebugRef.current) {
+            heightDebugRef.current.textContent = `Height: ${height}px (100vh)`;
+          }
         }
       };
       
@@ -320,6 +327,8 @@ function App() {
           onTouchEnd={() => handlePanelRelease(glassPanel4Ref)}
         />
       </div>
+      
+      <div ref={heightDebugRef} className="height-debug" />
     </div>
   );
 }
