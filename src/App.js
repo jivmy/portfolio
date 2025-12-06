@@ -49,10 +49,15 @@ function App() {
     const updateEmbedHeight = () => {
       if (embedRef.current) {
         const actualVh = window.innerHeight;
+        // Set CSS variable and update inline style
+        document.documentElement.style.setProperty('--embed-height', `${actualVh}px`);
         embedRef.current.style.height = `${actualVh}px`;
+        embedRef.current.style.setProperty('height', `${actualVh}px`, 'important');
       }
     };
     
+    // Initial update with small delay to ensure ref is set
+    setTimeout(updateEmbedHeight, 100);
     updateEmbedHeight();
     
     window.addEventListener('resize', updateEmbedHeight);
