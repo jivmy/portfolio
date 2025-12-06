@@ -25,7 +25,7 @@ function App() {
 
     // Load UnicornStudio script
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.36/dist/unicornStudio.umd.js';
+    script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js';
     script.onload = () => {
       setTimeout(() => {
         if (window.UnicornStudio?.init) {
