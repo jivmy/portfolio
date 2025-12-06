@@ -113,9 +113,12 @@ function App() {
           };
           
           const springProgress = heavySpring(progress);
-          const scale = 1 - springProgress * 0.9;
           const translateY = -springProgress * viewportHeight;
-          const opacity = 1 - progress;
+          
+          // When text reaches top of screen (translateY = -viewportHeight/2), springProgress = 0.5
+          // At that point: scale = 0, opacity = 0.25
+          const scale = Math.max(0, 1 - springProgress * 2);
+          const opacity = Math.max(0.25, 1 - springProgress * 1.5);
           
           bioTextRef.current.style.transform = `translate(-50%, calc(-50% + ${translateY}px)) scale(${scale})`;
           bioTextRef.current.style.opacity = opacity;
