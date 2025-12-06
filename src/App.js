@@ -55,21 +55,18 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const initUnicornStudio = () => {
-      if (window.UnicornStudio?.init) {
-        window.UnicornStudio.init();
-      }
-    };
-
-    if (window.UnicornStudio) {
-      setTimeout(initUnicornStudio, 100);
-      return;
+    if (!window.UnicornStudio) {
+      window.UnicornStudio = { isInitialized: false };
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js';
+      script.onload = () => {
+        if (!window.UnicornStudio.isInitialized) {
+          UnicornStudio.init();
+          window.UnicornStudio.isInitialized = true;
+        }
+      };
+      (document.head || document.body).appendChild(script);
     }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js';
-    script.onload = () => setTimeout(initUnicornStudio, 100);
-    (document.head || document.body).appendChild(script);
   }, []);
 
   useEffect(() => {
@@ -228,7 +225,6 @@ function App() {
       <div 
         ref={embedRef}
         data-us-project="lHYBB7eHby32vZtR9jsO"
-        data-us-production="true"
         className="unicorn-embed"
       />
       
