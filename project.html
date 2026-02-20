@@ -235,18 +235,22 @@
 
         .gallery-img img {
             position: absolute;
-            inset: 48px;
+            top: 48px;
+            left: 48px;
+            width: calc(100% - 96px);
+            height: calc(100% - 96px);
             object-fit: contain;
             border-radius: 12px;
         }
 
         /* Two images side by side */
         .gallery-img img:first-child:not(:only-child) {
-            right: calc(50% + 8px);
+            width: calc(50% - 48px - 8px);
         }
 
         .gallery-img img:first-child:not(:only-child) + img {
             left: calc(50% + 8px);
+            width: calc(50% - 48px - 8px);
         }
 
         /* ─── Tablet ─── */
@@ -267,9 +271,9 @@
             .gallery-row { height: auto; gap: 12px; }
             .gallery-row.half { grid-template-columns: 1fr; }
             .gallery-img { padding-bottom: 100%; }
-            .gallery-img img { inset: 32px; }
-            .gallery-img img:first-child:not(:only-child) { right: calc(50% + 6px); }
-            .gallery-img img:first-child:not(:only-child) + img { left: calc(50% + 6px); }
+            .gallery-img img { top: 32px; left: 32px; width: calc(100% - 64px); height: calc(100% - 64px); }
+            .gallery-img img:first-child:not(:only-child) { width: calc(50% - 32px - 6px); }
+            .gallery-img img:first-child:not(:only-child) + img { left: calc(50% + 6px); width: calc(50% - 32px - 6px); }
         }
 
         /* Reduced motion */
