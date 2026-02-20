@@ -12,7 +12,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after {
             margin: 0;
@@ -31,7 +31,6 @@
             --max-width: 1060px;
             --pad: clamp(24px, 5vw, 80px);
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         html {
@@ -106,10 +105,6 @@
             display: inline;
         }
 
-        .hero-heading .muted .char {
-            color: inherit;
-        }
-
         .hero-link {
             color: inherit;
             text-decoration: none;
@@ -179,10 +174,6 @@
 
         @keyframes sluggishX {
             to { opacity: 1; filter: blur(0); transform: translateX(0); }
-        }
-
-        @keyframes sluggishY {
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
 
         /* ─── Projects ─── */

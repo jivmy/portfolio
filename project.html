@@ -12,7 +12,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after {
             margin: 0;
@@ -24,8 +24,6 @@
             --black: #0f0f0f;
             --gray-600: #555;
             --gray-400: #999;
-            --gray-200: #c8c8c8;
-            --gray-100: #ececec;
             --bg: #fafaf8;
             --max-width: 1060px;
             --pad: clamp(24px, 5vw, 80px);
@@ -96,53 +94,37 @@
             to { opacity: 1; filter: blur(0); }
         }
 
-        /* ─── Text char animation ─── */
-        .char-animate .char {
-            display: inline-block;
-            opacity: 0;
-            filter: blur(8px);
-            transform: translateX(-4px);
-            animation: charIn 1.2s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
-            will-change: transform, opacity, filter;
-        }
-
-        .char-animate .word {
-            display: inline-block;
-            white-space: nowrap;
-        }
-
-        .char-animate .space {
-            display: inline;
-        }
-
-        @keyframes charIn {
-            to {
-                opacity: 1;
-                filter: blur(0);
-                transform: translateX(0);
-            }
-        }
-
-        /* ─── Header animations (label + title) ─── */
-        .char-animate-header .char {
-            display: inline-block;
-            opacity: 0;
-            filter: blur(8px);
-            transform: translateX(-6px);
-            animation: headerCharIn 1.4s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
-            will-change: transform, opacity, filter;
-        }
-
+        /* ─── Text char animations ─── */
+        .char-animate .word,
         .char-animate-header .word {
             display: inline-block;
             white-space: nowrap;
         }
 
+        .char-animate .space,
         .char-animate-header .space {
             display: inline;
         }
 
-        @keyframes headerCharIn {
+        .char-animate .char,
+        .char-animate-header .char {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(8px);
+            will-change: transform, opacity, filter;
+        }
+
+        .char-animate .char {
+            transform: translateX(-4px);
+            animation: charIn 1.2s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+        }
+
+        .char-animate-header .char {
+            transform: translateX(-6px);
+            animation: charIn 1.4s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes charIn {
             to {
                 opacity: 1;
                 filter: blur(0);
@@ -271,19 +253,6 @@
             left: calc(50% + 8px);
         }
 
-        /* Scroll reveal */
-        .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.7s var(--ease-out-expo),
-                        transform 0.7s var(--ease-out-expo);
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         /* ─── Tablet ─── */
         @media (max-width: 900px) {
             .project-info { gap: 32px; }
@@ -308,8 +277,9 @@
 
         /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
-            .project-nav, .project-info, .reveal,
-            .char-animate .char {
+            .project-nav, .project-info,
+            .char-animate .char,
+            .char-animate-header .char {
                 animation: none;
                 opacity: 1;
                 transform: none;
@@ -462,17 +432,6 @@
         splitChars(document.getElementById('pTeamLabel'), 'Team', 0.7, 0.025);
         splitChars(document.getElementById('pTeam'), project.team, 0.8, 0.02);
 
-        // Scroll reveal
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 
 </body>
