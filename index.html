@@ -195,12 +195,13 @@
             cursor: pointer;
             position: relative;
             opacity: 0;
+            filter: blur(12px);
             transform: translateY(400px);
-            animation: driftUp 3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+            animation: driftUp 5s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes driftUp {
-            to { opacity: 1; transform: translateY(0); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
         }
 
         .project-thumbnail {
@@ -220,13 +221,6 @@
             padding: clamp(20px, 3vw, 36px);
             gap: clamp(8px, 1.5vw, 16px);
             container-type: size;
-            opacity: 0;
-            filter: blur(12px);
-            animation: galleryIn 8s var(--ease-out-expo) 0.3s forwards;
-        }
-
-        @keyframes galleryIn {
-            to { opacity: 1; filter: blur(0); }
         }
 
         .project-thumbnail img {
@@ -268,9 +262,6 @@
             align-items: baseline;
             gap: 12px;
             padding: 14px 2px 0;
-            opacity: 0;
-            filter: blur(12px);
-            animation: galleryIn 8s var(--ease-out-expo) 0.3s forwards;
         }
 
         .project-category {
