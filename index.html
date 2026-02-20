@@ -27,7 +27,7 @@
             --gray-200: #c8c8c8;
             --gray-100: #ececec;
             --bg: #fafaf8;
-            --radius: 16px;
+            --radius: 36px;
             --max-width: 1060px;
             --pad: clamp(24px, 5vw, 80px);
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -184,11 +184,10 @@
         .project-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 36px;
+            gap: 20px;
         }
 
         .project-card {
-            cursor: pointer;
             position: relative;
             opacity: 0;
             filter: blur(12px);
@@ -202,6 +201,7 @@
 
         .project-thumbnail {
             --thumb-pad: clamp(20px, 3vw, 24px);
+            cursor: pointer;
             width: 100%;
             aspect-ratio: 4 / 3;
             border-radius: var(--radius);
@@ -286,11 +286,11 @@
             }
 
             .project-grid {
-                gap: 24px;
+                gap: 16px;
             }
 
             .project-thumbnail {
-                border-radius: 12px;
+                border-radius: 24px;
             }
 
         }
@@ -337,11 +337,11 @@
 
             .project-grid {
                 grid-template-columns: 1fr;
-                gap: 32px;
+                gap: 20px;
             }
 
             .project-thumbnail {
-                border-radius: 12px;
+                border-radius: 24px;
             }
 
 
@@ -381,47 +381,47 @@
 
         <section class="projects-section">
             <div class="project-grid">
-                <a href="project.html?id=1" class="project-card perspective-wrap" data-tilt>
-                    <div class="project-thumbnail">
+                <div class="project-card perspective-wrap" data-tilt>
+                    <a href="project.html?id=1" class="project-thumbnail">
                         <img src="images/memory-home.png" alt="Memory">
                         <div class="specular"></div>
-                    </div>
+                    </a>
                     <div class="project-meta">
                         <p class="project-category">Copilot</p>
                         <p class="project-title">Memory</p>
                     </div>
-                </a>
-                <a href="project.html?id=2" class="project-card perspective-wrap" data-tilt>
-                    <div class="project-thumbnail">
+                </div>
+                <div class="project-card perspective-wrap" data-tilt>
+                    <a href="project.html?id=2" class="project-thumbnail">
                         <img src="images/search-home-a.png" alt="Search">
                         <img src="images/search-home-b.png" alt="Search">
                         <div class="specular"></div>
-                    </div>
+                    </a>
                     <div class="project-meta">
                         <p class="project-category">Copilot</p>
                         <p class="project-title">Search</p>
                     </div>
-                </a>
-                <a href="project.html?id=3" class="project-card perspective-wrap" data-tilt>
-                    <div class="project-thumbnail">
+                </div>
+                <div class="project-card perspective-wrap" data-tilt>
+                    <a href="project.html?id=3" class="project-thumbnail">
                         <img src="images/research-home.png" alt="Research">
                         <div class="specular"></div>
-                    </div>
+                    </a>
                     <div class="project-meta">
                         <p class="project-category">Copilot</p>
                         <p class="project-title">Research</p>
                     </div>
-                </a>
-                <a href="project.html?id=4" class="project-card perspective-wrap" data-tilt>
-                    <div class="project-thumbnail">
+                </div>
+                <div class="project-card perspective-wrap" data-tilt>
+                    <a href="project.html?id=4" class="project-thumbnail">
                         <img src="images/video-home.png" alt="Videos">
                         <div class="specular"></div>
-                    </div>
+                    </a>
                     <div class="project-meta">
                         <p class="project-category">Copilot</p>
                         <p class="project-title">Videos</p>
                     </div>
-                </a>
+                </div>
             </div>
         </section>
 
@@ -500,11 +500,11 @@
                 const spec = card.querySelector('.specular');
                 let rect, raf;
 
-                card.addEventListener('mouseenter', () => {
+                thumb.addEventListener('mouseenter', () => {
                     rect = thumb.getBoundingClientRect();
                 });
 
-                card.addEventListener('mousemove', (e) => {
+                thumb.addEventListener('mousemove', (e) => {
                     if (!rect) rect = thumb.getBoundingClientRect();
                     cancelAnimationFrame(raf);
                     raf = requestAnimationFrame(() => {
@@ -523,7 +523,7 @@
                     });
                 });
 
-                card.addEventListener('mouseleave', () => {
+                thumb.addEventListener('mouseleave', () => {
                     cancelAnimationFrame(raf);
                     thumb.style.transform = '';
                     spec.style.background = '';
