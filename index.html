@@ -132,6 +132,7 @@
         .links-row {
             display: flex;
             gap: 32px;
+            margin-top: -16px;
         }
 
         .link-text {
@@ -318,6 +319,11 @@
                 flex-direction: column;
                 gap: 6px;
                 padding-left: 8px;
+                margin-top: -4px;
+            }
+
+            #emailLink {
+                order: -1;
             }
 
             .link-text {
@@ -552,6 +558,13 @@
 
             el.addEventListener('mouseleave', () => {
                 el.classList.remove('copied');
+            });
+
+            // On mobile, auto-reset after 2s
+            el.addEventListener('click', () => {
+                if (window.innerWidth <= 580) {
+                    setTimeout(() => el.classList.remove('copied'), 2000);
+                }
             });
         })();
     </script>
