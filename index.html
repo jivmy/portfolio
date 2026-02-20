@@ -229,8 +229,8 @@
         }
 
         .project-thumbnail img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
             min-width: 0;
             min-height: 0;
             object-fit: contain;
@@ -438,9 +438,8 @@
         // ─── Hero: letter-by-letter with tilt + blur ───
         (function () {
             const el = document.getElementById('heroHeading');
-            const isMobile = window.innerWidth <= 580;
             const segments = [
-                { text: isMobile ? "I'm Bob, a design lead making " : "I'm Jimmy, a design lead making " },
+                { text: "I'm Jimmy, a design lead making " },
                 { text: "Copilot", href: "https://copilot.com" },
                 { text: " more approachable at " },
                 { text: "Microsoft AI", href: "https://microsoft.ai" }
