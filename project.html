@@ -368,6 +368,9 @@
     </div>
 
     <script>
+        history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+
         const projects = [
             {
                 id: 1,
@@ -456,14 +459,12 @@
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
         splitChars(document.getElementById('pDesc'), project.description, 0.7, 0.002);
 
-        const isMobile = window.innerWidth <= 580;
-        const metaBase = isMobile ? 0.6 : 1.6;
-        splitChars(document.getElementById('pRoleLabel'), 'Role', metaBase, 0.025);
-        splitChars(document.getElementById('pRole'), project.role, metaBase + 0.1, 0.02);
-        splitChars(document.getElementById('pYearLabel'), 'Year', metaBase + 0.05, 0.025);
-        splitChars(document.getElementById('pYear'), project.year, metaBase + 0.15, 0.02);
-        splitChars(document.getElementById('pTeamLabel'), 'Team', metaBase + 0.1, 0.025);
-        splitChars(document.getElementById('pTeam'), project.team, metaBase + 0.2, 0.02);
+        splitChars(document.getElementById('pRoleLabel'), 'Role', 0.6, 0.025);
+        splitChars(document.getElementById('pRole'), project.role, 0.7, 0.02);
+        splitChars(document.getElementById('pYearLabel'), 'Year', 0.65, 0.025);
+        splitChars(document.getElementById('pYear'), project.year, 0.75, 0.02);
+        splitChars(document.getElementById('pTeamLabel'), 'Team', 0.7, 0.025);
+        splitChars(document.getElementById('pTeam'), project.team, 0.8, 0.02);
 
         // Scroll reveal
         const observer = new IntersectionObserver((entries) => {
