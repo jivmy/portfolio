@@ -260,14 +260,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            max-width: calc(100% - 96px);
+            max-height: calc(100% - 96px);
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
                         0 8px 32px rgba(0, 0, 0, 0.04),
                         0 20px 60px rgba(0, 0, 0, 0.03);
         }
-
-        .fit-h { height: calc(100% - 48px); width: auto; }
-        .fit-w { width: calc(100% - 48px); height: auto; }
 
         /* Scroll reveal */
         .reveal {
@@ -370,8 +369,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '9 XFN',
-                img1: ['images/memory-1.png'], fit1: 'fit-h',
-                img2: ['images/memory-2.png'], fit2: 'fit-h'
+                img1: ['images/memory-1.png'],
+                img2: ['images/memory-2.png']
             },
             {
                 id: 2,
@@ -381,8 +380,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '7 XFN',
-                img1: ['images/search-1.png'], fit1: 'fit-h',
-                img2: ['images/search-2.png'], fit2: 'fit-w'
+                img1: ['images/search-1.png'],
+                img2: ['images/search-2.png']
             },
             {
                 id: 3,
@@ -392,8 +391,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '11 XFN',
-                img1: ['images/research-1.png'], fit1: 'fit-h',
-                img2: ['images/research-2.png'], fit2: 'fit-h'
+                img1: ['images/research-1.png'],
+                img2: ['images/research-2.png']
             },
             {
                 id: 4,
@@ -403,8 +402,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '8 XFN',
-                img1: ['images/video-1.png'], fit1: 'fit-h',
-                img2: ['images/video-2-a.png', 'images/video-2-b.png'], fit2: 'fit-h'
+                img1: ['images/video-1.png'],
+                img2: ['images/video-2-a.png', 'images/video-2-b.png']
             }
         ];
 
@@ -442,11 +441,8 @@
         }
 
         // Set gallery images
-        function renderImages(id, srcs, fit) {
-            document.getElementById(id).innerHTML = srcs.map(s => `<img src="${s}" alt="${project.title}" class="${fit}">`).join('');
-        }
-        renderImages('pImg1', project.img1, project.fit1);
-        renderImages('pImg2', project.img2, project.fit2);
+        document.getElementById('pImg1').innerHTML = project.img1.map(s => `<img src="${s}" alt="${project.title}">`).join('');
+        document.getElementById('pImg2').innerHTML = project.img2.map(s => `<img src="${s}" alt="${project.title}">`).join('');
 
         splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
