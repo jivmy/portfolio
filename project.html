@@ -451,17 +451,21 @@
         document.getElementById('pImg1').innerHTML = project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('');
         document.getElementById('pImg2').innerHTML = project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('');
 
-        // Set explicit pixel max-height so iOS Safari doesn't ignore the constraint
-        // Use clientWidth (always reliable) since the container is a square
+        // Safari doesn't resolve max-height:100% against aspect-ratio heights.
+        // Fix: set explicit pixel height on container + pixel max-height on images.
         function constrainImages() {
             document.querySelectorAll('.gallery-img').forEach(container => {
+                container.style.height = container.clientWidth + 'px';
                 const pad = parseFloat(getComputedStyle(container).paddingTop);
                 const size = container.clientWidth - pad * 2;
                 container.querySelectorAll('img').forEach(img => { img.style.maxHeight = size + 'px'; });
             });
         }
-        requestAnimationFrame(constrainImages);
-        window.addEventListener('resize', constrainImages);
+        window.addEventListener('load', constrainImages);
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.gallery-img').forEach(c => { c.style.height = ''; });
+            requestAnimationFrame(constrainImages);
+        });
 
         splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
