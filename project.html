@@ -251,6 +251,8 @@
         .gallery-img {
             --thumb-pad: clamp(20px, 3vw, 24px);
             width: 100%;
+            height: 0;
+            padding-bottom: 100%;
             position: relative;
             opacity: 0;
             filter: blur(12px);
@@ -260,31 +262,41 @@
             background: rgba(0, 0, 0, 0.03);
         }
 
-        .gallery-img.square {
-            height: 0;
-            padding-bottom: 100%;
+        .gallery-img img {
+            position: absolute;
+            top: var(--thumb-pad);
+            left: var(--thumb-pad);
+            width: calc(100% - var(--thumb-pad) * 2);
+            height: calc(100% - var(--thumb-pad) * 2);
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
+                        0 8px 32px rgba(0, 0, 0, 0.04),
+                        0 20px 60px rgba(0, 0, 0, 0.03);
         }
 
-        .gallery-img-inner {
+        .gallery-img-multi {
             position: absolute;
-            inset: var(--thumb-pad);
+            top: var(--thumb-pad);
+            left: var(--thumb-pad);
+            width: calc(100% - var(--thumb-pad) * 2);
+            height: calc(100% - var(--thumb-pad) * 2);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: clamp(8px, 1.5vw, 16px);
         }
 
-        .gallery-img img {
-            max-width: 100%;
-            max-height: 100%;
+        .gallery-img-multi img {
+            position: static;
+            width: auto;
+            height: auto;
+            top: auto;
+            left: auto;
+            flex: 1;
             min-width: 0;
-            flex-shrink: 1;
+            max-height: 100%;
             object-fit: contain;
-            display: block;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
-                        0 8px 32px rgba(0, 0, 0, 0.04),
-                        0 20px 60px rgba(0, 0, 0, 0.03);
         }
 
         /* Scroll reveal */
@@ -344,8 +356,8 @@
 
         <div class="gallery">
             <div class="gallery-row half">
-                <div class="gallery-cell"><div class="gallery-img square" id="pImg1"></div></div>
-                <div class="gallery-cell"><div class="gallery-img square" id="pImg2"></div></div>
+                <div class="gallery-cell"><div class="gallery-img" id="pImg1"></div></div>
+                <div class="gallery-cell"><div class="gallery-img" id="pImg2"></div></div>
             </div>
         </div>
 
@@ -461,8 +473,15 @@
         }
 
         // Set gallery images
-        document.getElementById('pImg1').innerHTML = '<div class="gallery-img-inner">' + project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
-        document.getElementById('pImg2').innerHTML = '<div class="gallery-img-inner">' + project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
+        function renderImages(el, images, title) {
+            if (images.length === 1) {
+                el.innerHTML = `<img src="${images[0]}" alt="${title}">`;
+            } else {
+                el.innerHTML = '<div class="gallery-img-multi">' + images.map(src => `<img src="${src}" alt="${title}">`).join('') + '</div>';
+            }
+        }
+        renderImages(document.getElementById('pImg1'), project.img1, project.title);
+        renderImages(document.getElementById('pImg2'), project.img2, project.title);
 
         splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
