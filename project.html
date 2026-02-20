@@ -292,7 +292,6 @@
 <body>
 
     <nav class="project-nav">
-        <a id="navBack" href="#" class="nav-link">Back</a>
         <a href="index.html" class="nav-link">Home</a>
         <a id="navNext" href="#" class="nav-link">Next</a>
     </nav>
@@ -390,11 +389,9 @@
         const currentIndex = projects.findIndex(p => p.id === currentId);
         const project = projects[currentIndex] || projects[0];
 
-        const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
         const nextIndex = (currentIndex + 1) % projects.length;
 
         document.title = `${project.title} — Jimmy Shan`;
-        document.getElementById('navBack').href = `project.html?id=${projects[prevIndex].id}`;
         document.getElementById('navNext').href = `project.html?id=${projects[nextIndex].id}`;
 
         // Split text into animated characters
