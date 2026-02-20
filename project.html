@@ -257,15 +257,18 @@
 
         .gallery-img img {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: calc(100% - 96px);
-            max-height: calc(100% - 96px);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
-                        0 8px 32px rgba(0, 0, 0, 0.04),
-                        0 20px 60px rgba(0, 0, 0, 0.03);
+            inset: 48px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        /* Two images side by side (e.g. video project) */
+        .gallery-img img:first-child:not(:only-child) {
+            right: calc(50% + 8px);
+        }
+
+        .gallery-img img:first-child:not(:only-child) + img {
+            left: calc(50% + 8px);
         }
 
         /* Scroll reveal */
@@ -288,15 +291,19 @@
 
         /* ─── Mobile ─── */
         @media (max-width: 580px) {
-            .content { height: auto; overflow-x: hidden; overflow-y: visible; padding-top: 80px; }
-            .content > .container { display: flex; flex-direction: column; gap: 24px; }
+            .content { height: auto; overflow-y: visible; padding-top: 80px; }
+            .content > .container { display: flex; flex-direction: column; gap: 32px; }
             .project-nav { padding: 16px var(--pad); }
             .nav-link { font-size: 14px; }
-            .project-info { grid-template-columns: 1fr; gap: 24px; padding: 0 0 32px; order: -1; }
-            .project-title { font-size: 48px; }
+            .project-info { grid-template-columns: 1fr; gap: 24px; padding: 0 0 16px; order: -1; }
+            .project-title { font-size: 36px; }
             .project-meta-row { gap: 32px; }
             .gallery { flex: none; }
+            .gallery-row { gap: 12px; }
             .gallery-row.half { grid-template-columns: 1fr; }
+            .gallery-img img { inset: 32px; }
+            .gallery-img img:first-child:not(:only-child) { right: calc(50% + 6px); }
+            .gallery-img img:first-child:not(:only-child) + img { left: calc(50% + 6px); }
         }
 
         /* Reduced motion */
