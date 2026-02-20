@@ -297,11 +297,12 @@
 
         /* ─── Mobile ─── */
         @media (max-width: 580px) {
-            .content { height: auto; overflow: visible; }
+            .content { height: auto; overflow: visible; padding-top: 80px; }
             .content > .container { display: flex; flex-direction: column; gap: 48px; }
             .project-nav { padding: 16px var(--pad); }
             .nav-link { font-size: 14px; }
             .project-info { grid-template-columns: 1fr; gap: 24px; padding: 0 0 32px; order: -1; }
+            .project-title { font-size: 48px; }
             .project-meta-row { gap: 32px; }
             .gallery { flex: none; gap: 12px; }
             .gallery-row.half { flex: none; grid-template-columns: 1fr; }
