@@ -232,7 +232,6 @@
         /* ─── Image gallery ─── */
         .gallery {
             min-height: 0;
-            container-type: inline-size;
         }
 
         .gallery-row {
@@ -259,22 +258,24 @@
             border-radius: 24px;
             overflow: hidden;
             background: rgba(0, 0, 0, 0.03);
+            position: relative;
+        }
+
+        .gallery-img-inner {
+            position: absolute;
+            inset: var(--thumb-pad);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: var(--thumb-pad);
             gap: clamp(8px, 1.5vw, 16px);
-            container-type: size;
         }
 
         .gallery-img img {
-            max-width: calc(100cqw - var(--thumb-pad) * 2);
-            max-height: calc(100cqh - var(--thumb-pad) * 2);
+            max-width: 100%;
+            max-height: 100%;
             min-width: 0;
             object-fit: contain;
             display: block;
-            position: relative;
-            z-index: 1;
             flex-shrink: 1;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
@@ -459,9 +460,9 @@
             el.innerHTML = html;
         }
 
-        // Set gallery images
-        document.getElementById('pImg1').innerHTML = project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('');
-        document.getElementById('pImg2').innerHTML = project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('');
+        // Set gallery images — wrapped in absolutely positioned inner div for definite height
+        document.getElementById('pImg1').innerHTML = '<div class="gallery-img-inner">' + project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
+        document.getElementById('pImg2').innerHTML = '<div class="gallery-img-inner">' + project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
 
         splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
