@@ -438,8 +438,9 @@
         // ─── Hero: letter-by-letter with tilt + blur ───
         (function () {
             const el = document.getElementById('heroHeading');
+            const isMobile = window.innerWidth <= 580;
             const segments = [
-                { text: "I'm Jimmy, a design lead making " },
+                { text: isMobile ? "I'm Bob, a design lead making " : "I'm Jimmy, a design lead making " },
                 { text: "Copilot", href: "https://copilot.com" },
                 { text: " more approachable at " },
                 { text: "Microsoft AI", href: "https://microsoft.ai" }
