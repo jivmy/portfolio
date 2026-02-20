@@ -251,7 +251,8 @@
         .gallery-img {
             --thumb-pad: clamp(20px, 3vw, 24px);
             width: 100%;
-            aspect-ratio: 1 / 1;
+            height: 0;
+            padding-bottom: 100%;
             opacity: 0;
             filter: blur(12px);
             animation: galleryIn 2.5s var(--ease-out-expo) 0.3s forwards;
