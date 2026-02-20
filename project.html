@@ -272,16 +272,21 @@
         }
 
         .gallery-img img {
-            max-width: 100%;
-            max-height: 100%;
-            min-width: 0;
-            object-fit: contain;
             display: block;
-            flex-shrink: 1;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
                         0 8px 32px rgba(0, 0, 0, 0.04),
                         0 20px 60px rgba(0, 0, 0, 0.03);
+        }
+
+        .gallery-img img.fit-h {
+            height: 100%;
+            width: auto;
+        }
+
+        .gallery-img img.fit-w {
+            width: 100%;
+            height: auto;
         }
 
         /* Scroll reveal */
@@ -390,8 +395,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '9 XFN',
-                img1: ['images/memory-1.png'],
-                img2: ['images/memory-2.png']
+                img1: ['images/memory-1.png'], img1Fit: 'h',
+                img2: ['images/memory-2.png'], img2Fit: 'h'
             },
             {
                 id: 2,
@@ -401,8 +406,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '7 XFN',
-                img1: ['images/search-1.png'],
-                img2: ['images/search-2.png']
+                img1: ['images/search-1.png'], img1Fit: 'h',
+                img2: ['images/search-2.png'], img2Fit: 'w'
             },
             {
                 id: 3,
@@ -412,8 +417,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '11 XFN',
-                img1: ['images/research-1.png'],
-                img2: ['images/research-2.png']
+                img1: ['images/research-1.png'], img1Fit: 'h',
+                img2: ['images/research-2.png'], img2Fit: 'h'
             },
             {
                 id: 4,
@@ -423,8 +428,8 @@
                 role: 'Designer',
                 year: '2025',
                 team: '8 XFN',
-                img1: ['images/video-1.png'],
-                img2: ['images/video-2-a.png', 'images/video-2-b.png']
+                img1: ['images/video-1.png'], img1Fit: 'h',
+                img2: ['images/video-2-a.png', 'images/video-2-b.png'], img2Fit: 'h'
             }
         ];
 
@@ -461,9 +466,9 @@
             el.innerHTML = html;
         }
 
-        // Set gallery images — wrapped in absolutely positioned inner div for definite height
-        document.getElementById('pImg1').innerHTML = '<div class="gallery-img-inner">' + project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
-        document.getElementById('pImg2').innerHTML = '<div class="gallery-img-inner">' + project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('') + '</div>';
+        // Set gallery images
+        document.getElementById('pImg1').innerHTML = '<div class="gallery-img-inner">' + project.img1.map(src => `<img src="${src}" alt="${project.title}" class="fit-${project.img1Fit}">`).join('') + '</div>';
+        document.getElementById('pImg2').innerHTML = '<div class="gallery-img-inner">' + project.img2.map(src => `<img src="${src}" alt="${project.title}" class="fit-${project.img2Fit}">`).join('') + '</div>';
 
         splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
         splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
