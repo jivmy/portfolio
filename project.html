@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project — Jimmy Shan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0f0f0f;
+            --gray-600: #555;
+            --gray-400: #999;
+            --gray-200: #c8c8c8;
+            --gray-100: #ececec;
+            --bg: #fafaf8;
+            --max-width: 1060px;
+            --pad: clamp(24px, 5vw, 80px);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--black);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--pad);
+        }
+
+        /* ─── Nav bar ─── */
+        .project-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px var(--pad) 16px;
+            z-index: 100;
+            opacity: 0;
+            animation: fadeIn 0.8s var(--ease-out-expo) 0.2s forwards;
+        }
+
+        .nav-link {
+            font-size: 15px;
+            font-weight: 450;
+            color: var(--gray-400);
+            transition: color 0.3s ease;
+            padding: 8px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--black);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes galleryIn {
+            to { opacity: 1; filter: blur(0); }
+        }
+
+        /* ─── Text char animation ─── */
+        .char-animate .char {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateX(-4px);
+            animation: charIn 1.2s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+
+        .char-animate .word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .char-animate .space {
+            display: inline;
+        }
+
+        @keyframes charIn {
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateX(0);
+            }
+        }
+
+        /* ─── Header animations (label + title) ─── */
+        .char-animate-header .char {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateX(-6px);
+            animation: headerCharIn 1.4s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+
+        .char-animate-header .word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .char-animate-header .space {
+            display: inline;
+        }
+
+        @keyframes headerCharIn {
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateX(0);
+            }
+        }
+
+        .content {
+            height: 100dvh;
+            padding-top: 52px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content > .container {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            justify-content: center;
+        }
+
+        /* ─── Project info ─── */
+        .project-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            padding: 0 0 32px;
+            flex-shrink: 0;
+            opacity: 0;
+            animation: fadeIn 0.8s var(--ease-out-expo) 0.6s forwards;
+        }
+
+        .project-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .project-title {
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 450;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .project-description {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--gray-600);
+            line-height: 1.7;
+            max-width: 480px;
+            text-wrap: balance;
+        }
+
+        .project-meta-row {
+            display: flex;
+            gap: 48px;
+            margin-top: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        .meta-value {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--black);
+        }
+
+        /* ─── Image gallery ─── */
+        .gallery {
+            min-height: 0;
+            container-type: inline-size;
+        }
+
+        .gallery-row {
+            display: grid;
+            gap: 16px;
+        }
+
+        .gallery-row.half {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .gallery-img {
+            opacity: 0;
+            filter: blur(12px);
+            animation: galleryIn 2.5s var(--ease-out-expo) 0.3s forwards;
+            border-radius: 24px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.03);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(32px, 5vw, 64px);
+            gap: clamp(8px, 1.5vw, 16px);
+        }
+
+        .gallery-img.square {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+        }
+
+        .gallery-img img {
+            max-width: 100%;
+            max-height: 100%;
+            min-width: 0;
+            object-fit: contain;
+            display: block;
+            flex-shrink: 1;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
+                        0 8px 32px rgba(0, 0, 0, 0.04),
+                        0 20px 60px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s var(--ease-out-expo),
+                        transform 0.7s var(--ease-out-expo);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── Tablet ─── */
+        @media (max-width: 900px) {
+            .project-info { gap: 32px; }
+        }
+
+        /* ─── Mobile ─── */
+        @media (max-width: 580px) {
+            .content { height: auto; overflow: visible; }
+            .content > .container { display: flex; flex-direction: column; gap: 48px; }
+            .project-nav { padding: 16px var(--pad); }
+            .nav-link { font-size: 14px; }
+            .project-info { grid-template-columns: 1fr; gap: 24px; padding: 0 0 32px; order: -1; }
+            .project-meta-row { gap: 32px; }
+            .gallery { flex: none; gap: 12px; }
+            .gallery-row.half { flex: none; grid-template-columns: 1fr; }
+            .gallery-img.square { height: auto; width: 100%; }
+            .gallery-img { border-radius: 24px; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .project-nav, .project-info, .reveal,
+            .char-animate .char {
+                animation: none;
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="project-nav">
+        <a id="navBack" href="#" class="nav-link">Back</a>
+        <a href="index.html" class="nav-link">Home</a>
+        <a id="navNext" href="#" class="nav-link">Next</a>
+    </nav>
+
+    <div class="content">
+    <div class="container">
+
+        <div class="gallery">
+            <div class="gallery-row half">
+                <div class="gallery-img square" id="pImg1"></div>
+                <div class="gallery-img square" id="pImg2"></div>
+            </div>
+        </div>
+
+        <div class="project-info">
+            <div>
+                <p class="project-label char-animate-header" id="pLabel"></p>
+                <h1 class="project-title char-animate-header" id="pTitle"></h1>
+                <div class="project-meta-row">
+                    <div class="meta-item">
+                        <span class="meta-label char-animate" id="pRoleLabel"></span>
+                        <span class="meta-value char-animate" id="pRole"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label char-animate" id="pYearLabel"></span>
+                        <span class="meta-value char-animate" id="pYear"></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label char-animate" id="pTeamLabel"></span>
+                        <span class="meta-value char-animate" id="pTeam"></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p class="project-description char-animate" id="pDesc"></p>
+            </div>
+        </div>
+
+    </div>
+    </div>
+
+    <script>
+        const projects = [
+            {
+                id: 1,
+                label: 'Copilot',
+                title: 'Memory',
+                description: 'Designed Copilot\u2019s end-to-end memory experience, from long-term storage and management to the transparency layer giving people visibility into why responses are personalized. Defined citation and surfacing frameworks with PM and ML so users can verify, modify, and remove stored context. Resulted in a ~XX% monthly sessions uplift for eligible users.',
+                role: 'Design Lead',
+                year: '2025',
+                team: '9 XFN',
+                img1: ['images/memory-1.png'],
+                img2: ['images/memory-2.png']
+            },
+            {
+                id: 2,
+                label: 'Copilot',
+                title: 'Search',
+                description: 'Designed Copilot\u2019s conversation search, navigating trade-offs between keyword and semantic retrieval before pivoting to a modal pattern as extensibility concerns emerged. Partnered with engineering to resolve edge cases around multi-result surfacing in single conversations, shipping on an accelerated timeline. Grew adoption ~XX% in the first month.',
+                role: 'Design Lead',
+                year: '2025',
+                team: '7 XFN',
+                img1: ['images/search-1.png'],
+                img2: ['images/search-2.png']
+            },
+            {
+                id: 3,
+                label: 'Copilot',
+                title: 'Research',
+                description: 'Designed Copilot\u2019s deep research experience, including a research card that condenses multi-step reasoning into a scannable format without losing depth. Balanced information density with readability so users could follow the research process without consuming the full conversation. Increased click-through rate on research outputs by ~X%.',
+                role: 'Design Lead',
+                year: '2025',
+                team: '11 XFN',
+                img1: ['images/research-1.png'],
+                img2: ['images/research-2.png']
+            },
+            {
+                id: 4,
+                label: 'Copilot',
+                title: 'Videos',
+                description: 'Designed Copilot\u2019s Sora 2 video generation integration on a compressed timeline as a fast follow to OpenAI\u2019s release. Navigated cost and scoping constraints that shifted the feature from general availability to a gated rollout, unblocking engineering to build the tiered access infrastructure powering Copilot\u2019s premium content generation features.',
+                role: 'Design Lead',
+                year: '2025',
+                team: '8 XFN',
+                img1: ['images/video-1.png'],
+                img2: ['images/video-2-a.png', 'images/video-2-b.png']
+            }
+        ];
+
+        const params = new URLSearchParams(window.location.search);
+        const currentId = parseInt(params.get('id')) || 1;
+        const currentIndex = projects.findIndex(p => p.id === currentId);
+        const project = projects[currentIndex] || projects[0];
+
+        const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
+        const nextIndex = (currentIndex + 1) % projects.length;
+
+        document.title = `${project.title} — Jimmy Shan`;
+        document.getElementById('navBack').href = `project.html?id=${projects[prevIndex].id}`;
+        document.getElementById('navNext').href = `project.html?id=${projects[nextIndex].id}`;
+
+        // Split text into animated characters
+        function splitChars(el, text, baseDelay, step) {
+            let html = '';
+            let ci = 0;
+            const words = text.split(' ');
+            words.forEach((word, wi) => {
+                html += '<span class="word">';
+                for (let i = 0; i < word.length; i++) {
+                    const d = baseDelay + ci * step;
+                    html += `<span class="char" style="animation-delay:${d.toFixed(3)}s">${word[i]}</span>`;
+                    ci++;
+                }
+                html += '</span>';
+                if (wi < words.length - 1) {
+                    html += '<span class="space"> </span>';
+                    ci++;
+                }
+            });
+            el.innerHTML = html;
+        }
+
+        // Set gallery images
+        document.getElementById('pImg1').innerHTML = project.img1.map(src => `<img src="${src}" alt="${project.title}">`).join('');
+        document.getElementById('pImg2').innerHTML = project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('');
+
+        splitChars(document.getElementById('pLabel'), project.label, 0.4, 0.025);
+        splitChars(document.getElementById('pTitle'), project.title, 0.5, 0.03);
+        splitChars(document.getElementById('pDesc'), project.description, 0.7, 0.002);
+
+        splitChars(document.getElementById('pRoleLabel'), 'Role', 1.6, 0.025);
+        splitChars(document.getElementById('pRole'), project.role, 1.7, 0.02);
+        splitChars(document.getElementById('pYearLabel'), 'Year', 1.65, 0.025);
+        splitChars(document.getElementById('pYear'), project.year, 1.75, 0.02);
+        splitChars(document.getElementById('pTeamLabel'), 'Team', 1.7, 0.025);
+        splitChars(document.getElementById('pTeam'), project.team, 1.8, 0.02);
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+</html>

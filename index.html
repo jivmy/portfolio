@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimmy Shan — Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0f0f0f;
+            --gray-600: #555;
+            --gray-400: #999;
+            --gray-200: #c8c8c8;
+            --gray-100: #ececec;
+            --bg: #fafaf8;
+            --radius: 16px;
+            --max-width: 1060px;
+            --pad: clamp(24px, 5vw, 80px);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Montserrat', -apple-system, 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--black);
+            line-height: 1.5;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        ::selection {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--black);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--pad);
+        }
+
+        /* ─── Perspective wrapper for 3D card tilts ─── */
+        .perspective-wrap {
+            perspective: 1200px;
+        }
+
+        /* ─── Header ─── */
+        header {
+            padding-top: clamp(76px, 14vh, 176px);
+            padding-bottom: clamp(56px, 8vh, 100px);
+        }
+
+        .hero-heading {
+            font-family: 'Montserrat', -apple-system, sans-serif;
+            font-size: clamp(24px, 6vw, 72px);
+            font-weight: 450;
+            line-height: 1.08;
+            letter-spacing: -0.035em;
+            max-width: 760px;
+            margin-bottom: 56px;
+            perspective: 600px;
+            text-wrap: balance;
+        }
+
+        /* Character animation */
+        .hero-heading .char {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateY(40px) rotateX(50deg);
+            animation: charIn 1.2s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+            will-change: transform, opacity, filter;
+        }
+
+        .hero-heading .word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .hero-heading .space {
+            display: inline;
+        }
+
+        .hero-heading .muted .char {
+            color: inherit;
+        }
+
+        .hero-link {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .hero-link:hover .char {
+            color: rgba(15, 15, 15, 0.75);
+        }
+
+        @keyframes charIn {
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0) rotateX(0deg);
+            }
+        }
+
+        /* ─── Links ─── */
+        .links-row {
+            display: flex;
+            gap: 32px;
+        }
+
+        .link-text {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--gray-400);
+            transition: color 0.3s ease;
+            opacity: 0;
+            filter: blur(6px);
+            transform: translateX(-40px);
+            animation: sluggishX 1.8s cubic-bezier(0.2, 1.6, 0.3, 1) forwards;
+        }
+
+        .link-text:nth-child(1) { animation-delay: 1.5s; }
+        .link-text:nth-child(2) { animation-delay: 1.6s; }
+        .link-text:nth-child(3) { animation-delay: 1.7s; }
+
+        .link-text:hover {
+            color: var(--black);
+        }
+
+        /* Email copy feedback */
+        #emailLink {
+            display: inline-grid;
+        }
+
+        #emailLink .email-text,
+        #emailLink .email-copied {
+            grid-area: 1 / 1;
+            transition: opacity 0.25s ease;
+        }
+
+        #emailLink .email-copied {
+            opacity: 0;
+            color: var(--black);
+        }
+
+        #emailLink.copied .email-text { opacity: 0; }
+        #emailLink.copied .email-copied { opacity: 1; }
+
+        @keyframes sluggishX {
+            to { opacity: 1; filter: blur(0); transform: translateX(0); }
+        }
+
+        @keyframes sluggishY {
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
+        /* ─── Projects ─── */
+        .projects-section {
+            padding: 24px 0 clamp(100px, 16vh, 200px);
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 36px;
+        }
+
+        .project-card {
+            cursor: pointer;
+            position: relative;
+            opacity: 0;
+            transform: translateY(400px);
+            animation: driftUp 3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes driftUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .project-thumbnail {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.6s var(--ease-out-expo),
+                        box-shadow 0.6s var(--ease-out-expo);
+            transform-style: preserve-3d;
+            will-change: transform;
+            background: rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 3vw, 36px);
+            gap: clamp(8px, 1.5vw, 16px);
+            container-type: size;
+        }
+
+        .project-thumbnail img {
+            max-width: 100%;
+            max-height: 100%;
+            min-width: 0;
+            object-fit: contain;
+            display: block;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
+                        0 8px 32px rgba(0, 0, 0, 0.04),
+                        0 20px 60px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Specular highlight that follows mouse */
+        .project-thumbnail .specular {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 2;
+            border-radius: inherit;
+        }
+
+        .project-card:hover .specular {
+            opacity: 1;
+        }
+
+        .project-card:hover .project-thumbnail {
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.06),
+                        0 8px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .project-meta {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 14px 2px 0;
+        }
+
+        .project-category {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        .project-title {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: -0.005em;
+            color: var(--black);
+        }
+
+        /* ─── Tablet ─── */
+        @media (max-width: 900px) {
+            header {
+                padding-top: clamp(72px, 12vh, 140px);
+                padding-bottom: clamp(40px, 6vh, 72px);
+            }
+
+            .hero-heading {
+                margin-bottom: 40px;
+            }
+
+            .project-grid {
+                gap: 24px;
+            }
+
+            .project-thumbnail {
+                border-radius: 12px;
+            }
+
+        }
+
+        /* ─── Mobile ─── */
+        @media (max-width: 580px) {
+            header {
+                padding-top: var(--pad);
+                padding-bottom: 36px;
+            }
+
+            .hero-heading {
+                line-height: 1.14;
+                letter-spacing: -0.025em;
+                margin-bottom: 28px;
+            }
+
+            .links-row {
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .link-text {
+                font-size: 18px;
+                padding: 4px 0;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .projects-section {
+                padding-top: 20px;
+                padding-bottom: 64px;
+            }
+
+            .project-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .project-thumbnail {
+                border-radius: 12px;
+            }
+
+
+        }
+
+
+/* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-heading .char,
+            .link-text,
+            .project-card {
+                animation: none;
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+            .project-thumbnail {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1 class="hero-heading" id="heroHeading"
+                aria-label="I'm Jimmy, a design lead making Copilot more approachable at Microsoft AI"></h1>
+
+            <div class="links-row">
+                <a href="https://drive.google.com/file/d/14foZlnZNb7XwW6z-DDWHRS_2ZmMUwrIL/view" target="_blank" class="link-text">Resum&eacute;</a>
+                <a href="https://www.linkedin.com/in/jivmy/" target="_blank" class="link-text">LinkedIn</a>
+                <a href="#" class="link-text" id="emailLink"><span class="email-text">jimmy@jshan.ca</span><span class="email-copied">Copied</span></a>
+            </div>
+        </header>
+
+        <section class="projects-section">
+            <div class="project-grid">
+                <a href="project.html?id=1" class="project-card perspective-wrap" data-tilt>
+                    <div class="project-thumbnail">
+                        <img src="images/memory-home.png" alt="Memory">
+                        <div class="specular"></div>
+                    </div>
+                    <div class="project-meta">
+                        <p class="project-category">Copilot</p>
+                        <p class="project-title">Memory</p>
+                    </div>
+                </a>
+                <a href="project.html?id=2" class="project-card perspective-wrap" data-tilt>
+                    <div class="project-thumbnail">
+                        <img src="images/search-home-a.png" alt="Search">
+                        <img src="images/search-home-b.png" alt="Search">
+                        <div class="specular"></div>
+                    </div>
+                    <div class="project-meta">
+                        <p class="project-category">Copilot</p>
+                        <p class="project-title">Search</p>
+                    </div>
+                </a>
+                <a href="project.html?id=3" class="project-card perspective-wrap" data-tilt>
+                    <div class="project-thumbnail">
+                        <img src="images/research-home.png" alt="Research">
+                        <div class="specular"></div>
+                    </div>
+                    <div class="project-meta">
+                        <p class="project-category">Copilot</p>
+                        <p class="project-title">Research</p>
+                    </div>
+                </a>
+                <a href="project.html?id=4" class="project-card perspective-wrap" data-tilt>
+                    <div class="project-thumbnail">
+                        <img src="images/video-home.png" alt="Videos">
+                        <div class="specular"></div>
+                    </div>
+                    <div class="project-meta">
+                        <p class="project-category">Copilot</p>
+                        <p class="project-title">Videos</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // ─── Hero: letter-by-letter with tilt + blur ───
+        (function () {
+            const el = document.getElementById('heroHeading');
+            const segments = [
+                { text: "I'm Jimmy, a design lead making " },
+                { text: "Copilot", href: "https://copilot.com" },
+                { text: " more approachable at " },
+                { text: "Microsoft AI", href: "https://microsoft.ai" }
+            ];
+
+            let html = '';
+            let ci = 0;
+            const base = 0.08;
+            const step = 0.02;
+
+            segments.forEach(seg => {
+                const hasLink = !!seg.href;
+
+                // Add leading space if segment starts with one
+                if (seg.text.startsWith(' ')) {
+                    html += '<span class="space"> </span>';
+                    ci++;
+                }
+
+                const words = seg.text.trim().split(' ').filter(w => w.length > 0);
+
+                if (hasLink) html += `<a class="hero-link" href="${seg.href}" target="_blank">`;
+
+                words.forEach((word, wi) => {
+                    html += '<span class="word">';
+                    for (let i = 0; i < word.length; i++) {
+                        const d = base + ci * step;
+                        html += `<span class="char" style="animation-delay:${d.toFixed(3)}s">${word[i]}</span>`;
+                        ci++;
+                    }
+                    html += '</span>';
+
+                    if (wi < words.length - 1) {
+                        html += '<span class="space"> </span>';
+                        ci++;
+                    }
+                });
+
+                if (hasLink) html += '</a>';
+
+                // trailing space if segment ends with one
+                if (seg.text.endsWith(' ')) {
+                    html += '<span class="space"> </span>';
+                    ci++;
+                }
+            });
+
+            el.innerHTML = html;
+        })();
+
+        // ─── 3D tilt + specular highlight on project cards ───
+        (function () {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (!window.matchMedia('(hover: hover)').matches) return;
+
+            const cards = document.querySelectorAll('[data-tilt]');
+            const maxTilt = 6;    // degrees
+            const perspective = 1200;
+
+            cards.forEach(card => {
+                const thumb = card.querySelector('.project-thumbnail');
+                const spec = card.querySelector('.specular');
+                let rect, raf;
+
+                card.addEventListener('mouseenter', () => {
+                    rect = thumb.getBoundingClientRect();
+                });
+
+                card.addEventListener('mousemove', (e) => {
+                    if (!rect) rect = thumb.getBoundingClientRect();
+                    cancelAnimationFrame(raf);
+                    raf = requestAnimationFrame(() => {
+                        const x = (e.clientX - rect.left) / rect.width;   // 0..1
+                        const y = (e.clientY - rect.top) / rect.height;   // 0..1
+
+                        const rotateY = (x - 0.5) * maxTilt * 2;
+                        const rotateX = (0.5 - y) * maxTilt * 2;
+
+                        thumb.style.transform =
+                            `perspective(${perspective}px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+
+                        // Move specular highlight to mouse position
+                        spec.style.background =
+                            `radial-gradient(circle at ${(x * 100).toFixed(0)}% ${(y * 100).toFixed(0)}%, rgba(255,255,255,0.25) 0%, transparent 60%)`;
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    cancelAnimationFrame(raf);
+                    thumb.style.transform = '';
+                    spec.style.background = '';
+                    rect = null;
+                });
+            });
+        })();
+
+        // ─── Email copy to clipboard ───
+        (function () {
+            const el = document.getElementById('emailLink');
+            function playTick() {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 1800;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.08);
+            }
+
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText('jimmy@jshan.ca').then(() => {
+                    playTick();
+                    el.classList.add('copied');
+                });
+            });
+
+            el.addEventListener('mouseleave', () => {
+                el.classList.remove('copied');
+            });
+        })();
+    </script>
+
+
+</body>
+</html>
