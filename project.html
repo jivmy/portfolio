@@ -245,7 +245,7 @@
 
         .gallery-img {
             width: 100%;
-            padding-bottom: 100%;
+            aspect-ratio: 1 / 1;
             position: relative;
             border-radius: 24px;
             overflow: hidden;
@@ -255,27 +255,19 @@
             animation: galleryIn 2.5s var(--ease-out-expo) 0.3s forwards;
         }
 
-        .gallery-img-inner {
-            position: absolute;
-            top: 24px;
-            left: 24px;
-            right: 24px;
-            bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
         .gallery-img img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02),
                         0 8px 32px rgba(0, 0, 0, 0.04),
                         0 20px 60px rgba(0, 0, 0, 0.03);
         }
 
-        .fit-h { height: 100%; width: auto; }
-        .fit-w { width: 100%; height: auto; }
+        .fit-h { height: calc(100% - 48px); width: auto; }
+        .fit-w { width: calc(100% - 48px); height: auto; }
 
         /* Scroll reveal */
         .reveal {
@@ -451,8 +443,7 @@
 
         // Set gallery images
         function renderImages(id, srcs, fit) {
-            const imgs = srcs.map(s => `<img src="${s}" alt="${project.title}" class="${fit}">`).join('');
-            document.getElementById(id).innerHTML = `<div class="gallery-img-inner">${imgs}</div>`;
+            document.getElementById(id).innerHTML = srcs.map(s => `<img src="${s}" alt="${project.title}" class="${fit}">`).join('');
         }
         renderImages('pImg1', project.img1, project.fit1);
         renderImages('pImg2', project.img2, project.fit2);
