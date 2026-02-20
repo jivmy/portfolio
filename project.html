@@ -452,10 +452,12 @@
         document.getElementById('pImg2').innerHTML = project.img2.map(src => `<img src="${src}" alt="${project.title}">`).join('');
 
         // Set explicit pixel max-height so iOS Safari doesn't ignore the constraint
+        // Use clientWidth (always reliable) since the container is a square
         function constrainImages() {
             document.querySelectorAll('.gallery-img').forEach(container => {
-                const h = container.clientHeight - parseFloat(getComputedStyle(container).paddingTop) * 2;
-                container.querySelectorAll('img').forEach(img => { img.style.maxHeight = h + 'px'; });
+                const pad = parseFloat(getComputedStyle(container).paddingTop);
+                const size = container.clientWidth - pad * 2;
+                container.querySelectorAll('img').forEach(img => { img.style.maxHeight = size + 'px'; });
             });
         }
         requestAnimationFrame(constrainImages);
