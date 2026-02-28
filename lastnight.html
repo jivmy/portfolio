@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>5AM at Stanford — Jimmy Shan</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fafaf8;font-family:'Montserrat',sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#home-link{position:fixed;top:20px;left:24px;color:#666;font-size:14px;text-decoration:none;z-index:10;transition:color .3s}
+#home-link:hover{color:#fafaf8}
+#game-title{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#8888cc;margin-bottom:10px;font-weight:600;text-align:center}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;background:#0a0a12}
+</style>
+</head>
+<body>
+<a id="home-link" href="index.html">&larr; Home</a>
+<p id="game-title">5AM at Stanford</p>
+<canvas id="c"></canvas>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// STORY TEMPLATE — Passive Pixel Experience Engine
+// ═══════════════════════════════════════════════════════════════════════
+//
+// HOW TO USE THIS TEMPLATE:
+// 1. Edit the STORY object below with your title, characters, and palette
+// 2. Write draw functions for each scene (they render pixel art to canvas)
+// 3. Define your scenes array with draw functions, text, and timing
+//
+// Available engine helpers (defined below, usable in draw functions):
+//   drawText(text, x, y, color, scale)  — bitmap 5x5 font
+//   textWidth(text, scale)              — measure text width in pixels
+//   drawChar(px, py, name, dir, frame)  — draw a standing character
+//   drawSittingChar(px, py, name, dir)  — draw a sitting character
+//   drawSceneText(text)                 — bottom dialogue box
+//   playSound(type)                     — 'click','squeal','scare','camera','door'
+//   startDrone(scary)                   — ambient background drone
+//   stopDrone()                         — stop ambient drone
+//   W, H                               — canvas size (256x224)
+//   frameCount, sceneFrame              — animation timing
+//   scaryMode, shakeX, shakeY           — effect state
+//   cameraFlash, flashTimer             — camera flash effect
+//   PAL                                 — resolved palette colors
+//
+// ═══════════════════════════════════════════════════════════════════════
+
+const STORY = {
+  title: '5AM AT STANFORD',
+  subtitle: 'A TRUE STORY',
+  credit: 'A JIMMY SHAN JOINT',
+
+  palette: {
+    dark: '#0a0a12', wall: '#1a1a28', wallLit: '#22223a',
+    floor: '#181820', carpet: '#1a1520', desk: '#2a2028',
+    screen: '#334466', screenGlow: '#4455aa', skin: '#e8b88a',
+    bed: '#2a2038', pillow: '#3a3048', blanket: '#332a44',
+    moonlight: '#2a2a4a', outside: '#0a0a18', grass: '#0a1a0a',
+    stars: '#ffffff', text: '#8888cc', textDim: '#555577',
+    red: '#aa3333', scare: '#ff2222', flash: '#ffffff',
+    rodent: '#8a7060'
+  },
+
+  characters: {
+    jimmy: {
+      shirt: '#3a5a8a', hair: '#2a1a0a', skin: '#e8b88a',
+      legs: '#1a1a2a', glasses: false
+    },
+    garrett: {
+      shirt: '#6a3a5a', hair: '#4a3020', skin: '#e8b88a',
+      legs: '#1a1a2a', glasses: true, glassesColor: '#667'
+    }
+  },
+
+  creditLines: [
+    { text: 'BASED ON TRUE EVENTS.', color: 'text' },
+    { text: 'JANUARY 2025.', color: 'text' },
+    { text: '' },
+    { text: 'JIMMY MADE IT TO VANCOUVER.', color: 'textDim' },
+    { text: "HE MET 15 PEOPLE HE HADN'T", color: 'textDim' },
+    { text: 'SEEN SINCE HE WAS 6.', color: 'textDim' },
+    { text: '' },
+    { text: 'GARRETT IS STILL AT STANFORD.', color: 'textDim' },
+    { text: 'STILL THINKING ABOUT', color: 'textDim' },
+    { text: 'VIBE CODING.', color: 'textDim' },
+    { text: '' },
+    { text: 'THE RODENTS WERE NOT', color: 'textDim' },
+    { text: 'AVAILABLE FOR COMMENT.', color: 'textDim' },
+  ],
+
+  scenes: [
+    { wait: true, draw: drawTitle },
+    { wait: true, draw: drawDormExterior,
+      onEnter() { startDrone(false); } },
+    { wait: true, draw: drawDormRoom,
+      text: "5:03 AM. GARRETT'S DORM. STANFORD UNIVERSITY." },
+    { wait: true, draw: drawDormRoom,
+      text: "JIMMY AND GARRETT WATCH CREEPYPASTA ABOUT FRAT HAZING." },
+    { wait: true, draw: drawLaptopCloseup,
+      text: "THE VIDEO SAYS: 'AND THEY NEVER FOUND OUT WHAT MADE THE NOISE...'" },
+    { wait: false, duration: 120, draw: drawScareScene,
+      onEnter() { scaryMode = true; startDrone(true);
+        setTimeout(() => playSound('squeal'), 500);
+        setTimeout(() => playSound('scare'), 800); } },
+    { wait: true, draw: drawSpookedScene,
+      text: "WHAT THE HELL WAS THAT?!",
+      onEnter() { playSound('squeal'); } },
+    { wait: true, draw: drawSpookedLookAtEach,
+      text: "GARRETT: 'BRO... DID YOU HEAR THAT?'" },
+    { wait: true, draw: drawSpookedLookAtEach,
+      text: "JIMMY: 'I HAVE A FLIGHT IN 3 HOURS AND I'M GOING TO DIE HERE.'" },
+    { wait: true, draw: drawGoingOutside,
+      text: "THEY CREEP TOWARD THE DOOR...",
+      onEnter() { scaryMode = false; startDrone(false); playSound('door'); } },
+    { wait: false, duration: 90, draw: drawOutsideDiscovery,
+      onEnter() { playSound('squeal'); } },
+    { wait: true, draw: drawTheReveal,
+      text: "IT'S... TWO RODENTS. GOING AT IT.",
+      onEnter() { scaryMode = false; } },
+    { wait: true, draw: drawJimmyPhoto,
+      text: "JIMMY TAKES A PHOTO IN COMPLETE DISBELIEF.",
+      onEnter() { cameraFlash = 20; playSound('camera'); } },
+    { wait: true, draw: drawGarrettReaction,
+      text: "GARRETT: 'I HAVE TO QUIT MY PHD AND BECOME A VIBE CODER.'" },
+    { wait: true, draw: drawJimmyLeaves,
+      text: "JIMMY LEAVES FOR THE AIRPORT. SHELL-SHOCKED.",
+      onEnter() { playSound('door'); } },
+    { wait: true, draw: drawSplitEnding,
+      text: "8:00 AM. JIMMY FLIES TO VANCOUVER FOR ANDREW'S BIRTHDAY." },
+    { wait: true, draw: drawSplitEnding,
+      text: "HE'LL MEET 15 PEOPLE HE HASN'T SEEN SINCE HE WAS 6." },
+    { wait: true, draw: drawGarrettSleeping,
+      text: "GARRETT GOES TO BED. SCARED. THE SQUEALING CONTINUES." },
+    { wait: true, draw: drawFin, onEnter() { stopDrone(); } },
+  ]
+};
+
+// ─── SCENE DRAW FUNCTIONS ───────────────────────────────────────────
+// Each function draws one frame of a scene to the canvas.
+// Use engine helpers: drawText, drawChar, drawSittingChar, drawSceneText,
+// and reference PAL for colors, W/H for dimensions, frameCount for animation.
+
+function drawTitle() {
+  ctx.fillStyle = PAL.dark; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 30; i++) {
+    const sx = (i * 73 + 17) % W, sy = (i * 41 + 7) % (H/2);
+    if ((frameCount + i * 13) % 80 < 40) { ctx.fillStyle = PAL.stars; ctx.fillRect(sx, sy, 1, 1); }
+  }
+  const t1 = STORY.title;
+  drawText(t1, W/2 - textWidth(t1,2)/2, 50, PAL.text, 2);
+  const t2 = STORY.subtitle;
+  drawText(t2, W/2 - textWidth(t2,1)/2, 78, PAL.textDim, 1);
+  drawChar(W/2 - 24, 110, 'jimmy', 0, 0);
+  drawChar(W/2 + 8, 110, 'garrett', 0, 0);
+  const t3 = 'STARRING JIMMY AND GARRETT';
+  drawText(t3, W/2 - textWidth(t3,1)/2, 150, PAL.textDim, 1);
+  if (frameCount % 50 < 35) {
+    const p = 'PRESS SPACE';
+    drawText(p, W/2 - textWidth(p,1)/2, 190, '#aaa', 1);
+  }
+}
+
+function drawDormExterior() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 40; i++) {
+    const sx = (i * 67 + 11) % W, sy = (i * 37 + 5) % 80;
+    if ((frameCount + i * 17) % 90 < 45) { ctx.fillStyle = PAL.stars; ctx.fillRect(sx, sy, 1, 1); }
+  }
+  ctx.fillStyle = '#dde8ff'; ctx.fillRect(200, 20, 12, 12);
+  ctx.fillStyle = PAL.outside; ctx.fillRect(204, 18, 10, 10);
+  ctx.fillStyle = '#181828'; ctx.fillRect(40, 80, 176, 144);
+  for (let wy = 0; wy < 4; wy++) for (let wx = 0; wx < 5; wx++) {
+    const lit = wy === 2 && wx === 2;
+    ctx.fillStyle = lit ? PAL.screenGlow : '#0c0c18';
+    ctx.fillRect(52 + wx * 32, 92 + wy * 30, 12, 16);
+  }
+  ctx.fillStyle = PAL.grass; ctx.fillRect(0, H-20, W, 20);
+  const sign = "STANFORD UNIVERSITY";
+  drawText(sign, W/2 - textWidth(sign,1)/2, H-14, '#334', 1);
+  drawSceneText("ONE WINDOW IS STILL LIT AT 5 AM.");
+}
+
+function drawRoomBG() {
+  ctx.fillStyle = PAL.wall; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = PAL.floor; ctx.fillRect(0, 140, W, 84);
+  ctx.fillStyle = PAL.bed; ctx.fillRect(8, 70, 50, 60);
+  ctx.fillStyle = PAL.pillow; ctx.fillRect(10, 72, 20, 12);
+  ctx.fillStyle = PAL.blanket; ctx.fillRect(8, 84, 50, 46);
+  ctx.fillStyle = PAL.desk; ctx.fillRect(190, 60, 58, 70);
+  ctx.fillStyle = '#2a2a3a'; ctx.fillRect(192, 62, 54, 4);
+  ctx.fillStyle = '#1a2a1a'; ctx.fillRect(100, 20, 30, 40);
+  ctx.fillStyle = '#2a3a2a'; ctx.fillRect(102, 22, 26, 36);
+  drawText('PHD', 106, 35, '#3a4a3a', 1);
+  ctx.fillStyle = '#0a0a18'; ctx.fillRect(140, 15, 35, 45);
+  ctx.fillStyle = PAL.moonlight; ctx.fillRect(142, 17, 31, 41);
+  ctx.fillStyle = '#334466'; ctx.fillRect(155, 22, 8, 8);
+  ctx.fillStyle = '#1a1a28'; ctx.fillRect(W-20, 60, 20, 80);
+  ctx.fillStyle = '#2a2a3a'; ctx.fillRect(W-18, 62, 16, 76);
+  ctx.fillStyle = '#555'; ctx.fillRect(W-6, 96, 3, 3);
+  ctx.fillStyle = '#2a2a40'; ctx.fillRect(195, 68, 8, 20);
+  ctx.fillStyle = '#2a3040'; ctx.fillRect(205, 72, 6, 16);
+}
+
+function drawLaptop(px, py) {
+  ctx.fillStyle = '#111'; ctx.fillRect(px, py-12, 24, 14);
+  ctx.fillStyle = PAL.screen; ctx.fillRect(px+1, py-11, 22, 12);
+  if (scaryMode) {
+    ctx.fillStyle = PAL.red; ctx.fillRect(px+3, py-9, 18, 4);
+    if (frameCount % 6 < 3) { ctx.fillStyle = PAL.scare; ctx.fillRect(px+5, py-8, 4, 3); }
+  } else {
+    ctx.fillStyle = '#445577'; ctx.fillRect(px+3, py-9, 18, 4);
+    ctx.fillStyle = '#556688'; ctx.fillRect(px+3, py-4, 12, 2);
+  }
+  ctx.fillStyle = '#1a1a2a'; ctx.fillRect(px-2, py+2, 28, 4);
+}
+
+function drawDormRoom() {
+  drawRoomBG();
+  drawSittingChar(W/2 - 40, 110, 'jimmy', 0);
+  drawSittingChar(W/2 + 16, 110, 'garrett', 0);
+  drawLaptop(W/2 - 10, 120);
+  ctx.globalAlpha = 0.15 + Math.sin(frameCount * 0.1) * 0.05;
+  ctx.fillStyle = PAL.screenGlow;
+  ctx.fillRect(W/2 - 50, 100, 100, 30);
+  ctx.globalAlpha = 1;
+  drawSceneText(scenes[scene].text);
+}
+
+function drawLaptopCloseup() {
+  ctx.fillStyle = PAL.dark; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#111'; ctx.fillRect(30, 30, 196, 120);
+  ctx.fillStyle = PAL.screen; ctx.fillRect(32, 32, 192, 116);
+  ctx.fillStyle = '#445577'; ctx.fillRect(40, 42, 176, 80);
+  const creepyLines = ['FRAT HAZING:', 'THE UNTOLD', 'STORIES...'];
+  creepyLines.forEach((l, i) => {
+    drawText(l, W/2 - textWidth(l,1)/2, 50 + i * 12, i === 2 ? PAL.scare : PAL.red, 1);
+  });
+  ctx.fillStyle = '#333'; ctx.fillRect(40, 128, 176, 4);
+  ctx.fillStyle = PAL.red; ctx.fillRect(40, 128, 140, 4);
+  drawText('4:52:31', 180, 136, '#666', 1);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawScareScene() {
+  drawRoomBG();
+  const intensity = Math.min(1, sceneFrame / 30);
+  shakeX = (Math.random() - 0.5) * 6 * intensity;
+  shakeY = (Math.random() - 0.5) * 4 * intensity;
+  ctx.save(); ctx.translate(shakeX, shakeY);
+  drawSittingChar(W/2 - 40, 110, 'jimmy', 0);
+  drawSittingChar(W/2 + 16, 110, 'garrett', 0);
+  drawLaptop(W/2 - 10, 120);
+  ctx.restore();
+  if (sceneFrame > 20 && sceneFrame % 8 < 3) {
+    ctx.globalAlpha = 0.2; ctx.fillStyle = PAL.scare; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  }
+  const darkness = Math.min(0.5, sceneFrame / 120);
+  ctx.fillStyle = `rgba(0,0,0,${darkness})`;
+  ctx.fillRect(0, 0, 40, H); ctx.fillRect(W-40, 0, 40, H); ctx.fillRect(0, 0, W, 30);
+  if (sceneFrame > 30 && sceneFrame < 90) {
+    const squeals = ['SQUEEEE', 'EEEEEE', 'EEAL!!'];
+    const si = Math.floor((sceneFrame - 30) / 20) % 3;
+    const t = squeals[si];
+    drawText(t, W/2 - textWidth(t,2)/2 + (Math.random()-0.5)*4, 20 + (Math.random()-0.5)*3, PAL.scare, 2);
+  }
+  if (sceneFrame > 40) {
+    drawText('!', W/2 - 34, 96, PAL.scare, 2);
+    drawText('!', W/2 + 22, 96, PAL.scare, 2);
+  }
+}
+
+function drawSpookedScene() {
+  drawRoomBG();
+  drawChar(W/2 - 40, 100, 'jimmy', 3, 0);
+  drawChar(W/2 + 16, 100, 'garrett', 2, 0);
+  drawLaptop(W/2 - 10, 130);
+  drawText('!?', W/2 - 36, 86, PAL.scare, 1);
+  drawText('!?', W/2 + 22, 86, PAL.scare, 1);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawSpookedLookAtEach() {
+  drawRoomBG();
+  drawChar(W/2 - 30, 100, 'jimmy', 3, 0);
+  drawChar(W/2 + 14, 100, 'garrett', 2, 0);
+  drawLaptop(W/2 - 10, 130);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawGoingOutside() {
+  drawRoomBG();
+  const walkFrame = Math.floor(sceneFrame / 8) % 2;
+  const progress = Math.min(1, sceneFrame / 60);
+  const doorX = W - 30;
+  const x1 = (W/2 - 30) + (doorX - (W/2 - 30) - 20) * progress;
+  const x2 = (W/2 + 14) + (doorX - (W/2 + 14) - 10) * progress;
+  drawChar(x1, 100, 'jimmy', 3, walkFrame);
+  drawChar(x2, 100, 'garrett', 3, walkFrame);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawRodent(px, py, flip) {
+  ctx.fillStyle = PAL.rodent;
+  ctx.fillRect(px+2, py+4, 8, 5);
+  ctx.fillRect(px + (flip ? 8 : 0), py+3, 4, 4);
+  ctx.fillRect(px + (flip ? 10 : 1), py+2, 2, 2);
+  ctx.fillStyle = '#6a5a4a';
+  if (flip) { ctx.fillRect(px, py+6, 3, 1); ctx.fillRect(px-1, py+5, 2, 1); }
+  else { ctx.fillRect(px+9, py+6, 3, 1); ctx.fillRect(px+11, py+5, 2, 1); }
+  ctx.fillStyle = '#111';
+  ctx.fillRect(px + (flip ? 9 : 2), py+4, 1, 1);
+}
+
+function drawOutsideDiscovery() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 30; i++) {
+    const sx = (i * 71 + 13) % W, sy = (i * 39 + 7) % 60;
+    if ((frameCount + i * 11) % 70 < 35) { ctx.fillStyle = PAL.stars; ctx.fillRect(sx, sy, 1, 1); }
+  }
+  ctx.fillStyle = '#141428'; ctx.fillRect(0, 60, W, 164);
+  ctx.fillStyle = '#0a1a0a'; ctx.fillRect(0, 170, W, 54);
+  ctx.fillStyle = '#1a1a30'; ctx.fillRect(W/2 - 15, 90, 30, 80);
+  ctx.fillStyle = '#2a2a40'; ctx.fillRect(W/2 - 13, 92, 26, 76);
+  const peekProgress = Math.min(1, sceneFrame / 40);
+  drawChar(W/2 - 20, 120 + (1-peekProgress)*20, 'jimmy', 0, 0);
+  drawChar(W/2 + 4, 120 + (1-peekProgress)*20, 'garrett', 0, 0);
+  if (sceneFrame > 50) {
+    ctx.fillStyle = '#0a2a0a'; ctx.fillRect(60, 158, 24, 16);
+    ctx.fillStyle = '#0a3a0a'; ctx.fillRect(62, 156, 20, 14);
+    const wiggle = Math.sin(frameCount * 0.5) * 1;
+    drawRodent(70, 164 + wiggle, false);
+    drawRodent(72, 162 - wiggle, true);
+  }
+  if (sceneFrame > 30) drawText('???', W/2 - 14, 110, '#aaa', 1);
+}
+
+function drawTheReveal() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#0a1a0a'; ctx.fillRect(0, 140, W, 84);
+  ctx.fillStyle = '#0a2a0a'; ctx.fillRect(80, 120, 60, 40);
+  ctx.fillStyle = '#0a3a0a'; ctx.fillRect(85, 115, 50, 35);
+  const wiggle = Math.sin(frameCount * 0.3) * 2;
+  ctx.save(); ctx.translate(W/2 - 20, 130); ctx.scale(2, 2);
+  drawRodent(0, wiggle, false);
+  drawRodent(4, -wiggle, true);
+  ctx.restore();
+  if (frameCount % 30 < 20) {
+    ctx.fillStyle = '#ff6688';
+    ctx.fillRect(W/2 - 10, 115, 3, 3);
+    ctx.fillRect(W/2 + 8, 118, 3, 3);
+  }
+  drawChar(40, 100, 'jimmy', 0, 0);
+  drawChar(W - 60, 100, 'garrett', 0, 0);
+  drawText('...', 48, 88, '#aaa', 1);
+  drawText('...', W-52, 88, '#aaa', 1);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawJimmyPhoto() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#0a1a0a'; ctx.fillRect(0, 140, W, 84);
+  ctx.fillStyle = '#0a2a0a'; ctx.fillRect(100, 130, 50, 30);
+  const wiggle = Math.sin(frameCount * 0.3) * 1;
+  drawRodent(115, 136 + wiggle, false);
+  drawRodent(119, 134 - wiggle, true);
+  drawChar(70, 100, 'jimmy', 3, 0);
+  ctx.fillStyle = '#222'; ctx.fillRect(84, 100, 6, 10);
+  ctx.fillStyle = '#4455aa'; ctx.fillRect(85, 101, 4, 7);
+  if (cameraFlash > 0) {
+    ctx.globalAlpha = cameraFlash / 20;
+    ctx.fillStyle = PAL.flash; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1; cameraFlash--;
+  }
+  drawChar(170, 100, 'garrett', 2, 0);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawGarrettReaction() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#0a1a0a'; ctx.fillRect(0, 140, W, 84);
+  ctx.save(); ctx.translate(W/2 - 16, 70); ctx.scale(3, 3);
+  ctx.fillStyle = PAL.skin; ctx.fillRect(0, 0, 10, 10);
+  ctx.fillStyle = STORY.characters.garrett.hair;
+  ctx.fillRect(0, -1, 10, 3); ctx.fillRect(-1, 0, 2, 4); ctx.fillRect(9, 0, 2, 4);
+  ctx.fillStyle = STORY.characters.garrett.glassesColor || '#667';
+  ctx.fillRect(0, 3, 10, 1);
+  ctx.fillRect(1, 3, 3, 3); ctx.fillRect(6, 3, 3, 3);
+  ctx.fillStyle = '#fff'; ctx.fillRect(2, 4, 2, 1); ctx.fillRect(7, 4, 2, 1);
+  ctx.fillStyle = '#111'; ctx.fillRect(2, 4, 1, 1); ctx.fillRect(7, 4, 1, 1);
+  ctx.fillStyle = '#111'; ctx.fillRect(4, 7, 3, 2);
+  ctx.restore();
+  drawSceneText(scenes[scene].text);
+}
+
+function drawJimmyLeaves() {
+  ctx.fillStyle = PAL.outside; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 150, W, 74);
+  ctx.fillStyle = '#2a2a2a';
+  for (let x = 0; x < W; x += 24) ctx.fillRect(x, 170, 12, 2);
+  ctx.fillStyle = '#141428'; ctx.fillRect(160, 50, 90, 100);
+  const walkF = Math.floor(frameCount / 10) % 2;
+  const jimmyX = 30 + Math.min(180, sceneFrame * 1.5);
+  drawChar(jimmyX, 140, 'jimmy', 3, walkF);
+  ctx.fillStyle = '#1a1a30'; ctx.fillRect(20, 80, 24, 60);
+  drawChar(22, 100, 'garrett', 3, 0);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawSplitEnding() {
+  ctx.fillStyle = '#0a0a18'; ctx.fillRect(0, 0, W/2, H);
+  ctx.fillStyle = '#667'; ctx.fillRect(30, 40, 20, 6);
+  ctx.fillStyle = '#889'; ctx.fillRect(35, 38, 10, 3);
+  ctx.fillRect(32, 43, 16, 2);
+  ctx.fillStyle = '#aab';
+  ctx.fillRect(34, 41, 1, 1); ctx.fillRect(37, 41, 1, 1);
+  ctx.fillRect(40, 41, 1, 1); ctx.fillRect(43, 41, 1, 1);
+  drawText('YVR', 40, 70, PAL.textDim, 1);
+  drawText('VANCOUVER', 14, 80, PAL.textDim, 1);
+  drawChar(50, 100, 'jimmy', 0, 0);
+  drawText('JIMMY', 44, 125, PAL.text, 1);
+  ctx.fillStyle = '#333'; ctx.fillRect(W/2-1, 0, 2, H);
+  ctx.fillStyle = PAL.wall; ctx.fillRect(W/2, 0, W/2, H);
+  ctx.fillStyle = PAL.floor; ctx.fillRect(W/2, 140, W/2, 84);
+  ctx.fillStyle = PAL.bed; ctx.fillRect(W/2+20, 90, 80, 50);
+  ctx.fillStyle = PAL.blanket; ctx.fillRect(W/2+20, 100, 80, 40);
+  ctx.fillStyle = PAL.pillow; ctx.fillRect(W/2+22, 92, 25, 10);
+  ctx.fillStyle = '#3a3050'; ctx.fillRect(W/2+30, 102, 40, 12);
+  ctx.fillStyle = PAL.skin; ctx.fillRect(W/2+25, 94, 8, 6);
+  ctx.fillStyle = STORY.characters.garrett.hair; ctx.fillRect(W/2+25, 93, 8, 3);
+  drawText('GARRETT', W/2+40, 150, PAL.text, 1);
+  drawSceneText(scenes[scene].text);
+}
+
+function drawGarrettSleeping() {
+  ctx.fillStyle = PAL.wall; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = PAL.floor; ctx.fillRect(0, 150, W, 74);
+  ctx.fillStyle = PAL.bed; ctx.fillRect(40, 80, 176, 70);
+  ctx.fillStyle = PAL.blanket; ctx.fillRect(40, 95, 176, 55);
+  ctx.fillStyle = PAL.pillow; ctx.fillRect(45, 82, 40, 15);
+  ctx.fillStyle = '#3a3050'; ctx.fillRect(60, 98, 80, 15);
+  ctx.fillStyle = PAL.skin; ctx.fillRect(50, 86, 12, 8);
+  ctx.fillStyle = STORY.characters.garrett.hair; ctx.fillRect(50, 84, 12, 4);
+  ctx.fillStyle = '#667'; ctx.fillRect(170, 80, 8, 3);
+  ['Z','Z','Z'].forEach((z, i) => {
+    const zy = 70 - i * 12 - (frameCount * 0.3) % 20;
+    if (zy > 30) drawText(z, 60 + i * 8, zy, PAL.textDim, 1);
+  });
+  if (frameCount % 60 < 10) drawText('SQUEAK', 160, 60 + Math.random()*4, PAL.scare, 1);
+  if (frameCount % 80 < 20) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(66, 100, 3, 2);
+    ctx.fillStyle = '#111'; ctx.fillRect(67, 100, 1, 2);
+  }
+  drawSceneText(scenes[scene].text);
+}
+
+function drawFin() {
+  ctx.fillStyle = PAL.dark; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 40; i++) {
+    const sx = (i*67+11)%W, sy = (i*37+5)%80;
+    if ((frameCount+i*17)%90<45) { ctx.fillStyle = PAL.stars; ctx.fillRect(sx, sy, 1, 1); }
+  }
+  drawText('FIN', W/2 - textWidth('FIN',3)/2, 50, PAL.text, 3);
+  STORY.creditLines.forEach((l, i) => {
+    if (l.text === '') return;
+    const color = PAL[l.color] || PAL.textDim;
+    drawText(l.text, W/2 - textWidth(l.text,1)/2, 80 + i * 9, color, 1);
+  });
+  if (frameCount % 50 < 35) {
+    const p = STORY.credit;
+    drawText(p, W/2 - textWidth(p,1)/2, 210, '#333', 1);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// ENGINE — No edits needed below this line
+// ═══════════════════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 256, H = 224;
+canvas.width = W; canvas.height = H;
+
+function resize() {
+  const maxW = window.innerWidth - 20, maxH = window.innerHeight - 80;
+  const scale = Math.max(1, Math.min(Math.floor(maxW / W), Math.floor(maxH / H)));
+  canvas.style.width = (W * scale) + 'px';
+  canvas.style.height = (H * scale) + 'px';
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── PALETTE ───
+const PAL = STORY.palette;
+
+// ─── AUDIO ───
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+
+function playSound(type) {
+  try {
+    const ac = getAudio();
+    switch(type) {
+      case 'click': {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.frequency.value = 300; o.type = 'sine';
+        g.gain.setValueAtTime(0.03, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.05);
+        o.start(ac.currentTime); o.stop(ac.currentTime + 0.05);
+        break;
+      }
+      case 'squeal': {
+        for (let i = 0; i < 3; i++) {
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.connect(g); g.connect(ac.destination);
+          o.frequency.value = 2000 + Math.random() * 2000; o.type = 'sawtooth';
+          const t = ac.currentTime + i * 0.15;
+          g.gain.setValueAtTime(0.08, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          o.start(t); o.stop(t + 0.12);
+        }
+        break;
+      }
+      case 'scare': {
+        const o1 = ac.createOscillator(), g1 = ac.createGain();
+        o1.connect(g1); g1.connect(ac.destination);
+        o1.frequency.value = 60; o1.type = 'sawtooth';
+        g1.gain.setValueAtTime(0.1, ac.currentTime);
+        g1.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.8);
+        o1.start(ac.currentTime); o1.stop(ac.currentTime + 0.8);
+        const o2 = ac.createOscillator(), g2 = ac.createGain();
+        o2.connect(g2); g2.connect(ac.destination);
+        o2.frequency.value = 1800; o2.type = 'square';
+        g2.gain.setValueAtTime(0.06, ac.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+        o2.start(ac.currentTime); o2.stop(ac.currentTime + 0.3);
+        break;
+      }
+      case 'camera': {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.frequency.value = 1200; o.type = 'square';
+        g.gain.setValueAtTime(0.04, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.04);
+        o.start(ac.currentTime); o.stop(ac.currentTime + 0.04);
+        break;
+      }
+      case 'door': {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.frequency.value = 120; o.type = 'sine';
+        g.gain.setValueAtTime(0.05, ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+        o.start(ac.currentTime); o.stop(ac.currentTime + 0.3);
+        break;
+      }
+    }
+  } catch(e) {}
+}
+
+let droneNodes = [];
+function startDrone(scary) {
+  stopDrone();
+  const ac = getAudio();
+  const master = ac.createGain();
+  master.gain.value = 0; master.connect(ac.destination);
+  master.gain.linearRampToValueAtTime(scary ? 0.04 : 0.02, ac.currentTime + 2);
+  const freqs = scary ? [55, 82.4, 110] : [130.8, 164.8, 196];
+  freqs.forEach(f => {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.value = f; g.gain.value = 0.3;
+    o.connect(g); g.connect(master); o.start(); droneNodes.push(o);
+    const lfo = ac.createOscillator(), lg = ac.createGain();
+    lfo.frequency.value = 0.3 + Math.random() * 0.3; lg.gain.value = 2;
+    lfo.connect(lg); lg.connect(o.frequency); lfo.start(); droneNodes.push(lfo);
+  });
+  droneNodes.push(master);
+}
+function stopDrone() { droneNodes.forEach(n => { try { if(n.stop) n.stop(); else n.disconnect(); } catch(e){} }); droneNodes = []; }
+
+// ─── FONT ───
+const FONT_DATA = {};
+const fontDefs = {
+  'A':'0110010010111101001010010','B':'1110010010111001001011100',
+  'C':'0111010000100001000001110','D':'1110010010100101001011100',
+  'E':'1111010000111001000011110','F':'1111010000111001000010000',
+  'G':'0111010000101101001001110','H':'1001010010111101001010010',
+  'I':'1110001000010000100011100','J':'0011000010000101001001100',
+  'K':'1001010100110001010010010','L':'1000010000100001000011110',
+  'M':'1000111011101011000110001','N':'1000111001101011001110001',
+  'O':'0110010010100101001001100','P':'1110010010111001000010000',
+  'Q':'0110010010100101010000110','R':'1110010010111001010010010',
+  'S':'0111010000011000001011100','T':'1111100100001000010000100',
+  'U':'1001010010100101001001100','V':'1000110001010100101000100',
+  'W':'1000110001101011101101010','X':'1000101010001000101010001',
+  'Y':'1000101010001000010000100','Z':'1111100010001000100011111',
+  '0':'0110010010100101001001100','1':'0100011000010000100011100',
+  '2':'0110010010001000100011110','3':'1110000010011000001011100',
+  '4':'1001010010111100001000010','5':'1111010000111000001011100',
+  '6':'0110010000111001001001100','7':'1111000010001000100001000',
+  '8':'0110010010011001001001100','9':'0110010010011100001001100',
+  ' ':'0000000000000000000000000','.':'0000000000000000000000100',
+  ',':'0000000000000000010001000','!':'0010000100001000000000100',
+  '?':'0110010010001000000000100','-':'0000000000011100000000000',
+  ':':'0000000100000000010000000',"'":'0010000100000000000000000',
+  '"':'0101001010000000000000000',
+};
+Object.keys(fontDefs).forEach(ch => {
+  const bits = fontDefs[ch], arr = [];
+  for (let y = 0; y < 5; y++) { arr[y] = []; for (let x = 0; x < 5; x++) arr[y][x] = bits[y*5+x] === '1' ? 1 : 0; }
+  FONT_DATA[ch] = arr;
+});
+function drawText(text, x, y, color, scale) {
+  scale = scale || 1; ctx.fillStyle = color || '#fff';
+  const str = text.toUpperCase(); let cx = x;
+  for (let i = 0; i < str.length; i++) {
+    const gl = FONT_DATA[str[i]];
+    if (gl) for (let gy = 0; gy < 5; gy++) for (let gx = 0; gx < 5; gx++) if (gl[gy][gx]) ctx.fillRect(cx+gx*scale, y+gy*scale, scale, scale);
+    cx += 6 * scale;
+  }
+}
+function textWidth(t, s) { return t.length * 6 * (s||1) - (s||1); }
+
+// ─── CHARACTER DRAWING ───
+function drawChar(px, py, name, dir, frame) {
+  const ch = STORY.characters[name];
+  if (!ch) return;
+  ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(px+2, py+14, 12, 2);
+  ctx.fillStyle = ch.shirt; ctx.fillRect(px+4, py+6, 8, 6);
+  ctx.fillStyle = ch.legs || '#1a1a2a';
+  const lo = frame % 2 === 1 ? 1 : 0;
+  ctx.fillRect(px+4+lo, py+12, 3, 3); ctx.fillRect(px+9-lo, py+12, 3, 3);
+  ctx.fillStyle = ch.skin || PAL.skin; ctx.fillRect(px+4, py+1, 8, 6);
+  ctx.fillStyle = ch.hair;
+  if (dir === 1) { ctx.fillRect(px+4, py, 8, 5); }
+  else { ctx.fillRect(px+4, py, 8, 3); ctx.fillRect(px+3, py+1, 2, 3); ctx.fillRect(px+11, py+1, 2, 3); }
+  if (dir !== 1) {
+    ctx.fillStyle = '#1a1a2e';
+    if (dir === 0) { ctx.fillRect(px+5, py+4, 2, 1); ctx.fillRect(px+9, py+4, 2, 1); }
+    else if (dir === 2) { ctx.fillRect(px+5, py+4, 2, 1); ctx.fillRect(px+8, py+4, 2, 1); }
+    else { ctx.fillRect(px+6, py+4, 2, 1); ctx.fillRect(px+9, py+4, 2, 1); }
+  }
+  if (ch.glasses && dir !== 1) {
+    ctx.fillStyle = ch.glassesColor || '#667';
+    ctx.fillRect(px+4, py+3, 8, 1);
+    ctx.fillRect(px+4, py+3, 1, 3); ctx.fillRect(px+7, py+3, 1, 3);
+    ctx.fillRect(px+8, py+3, 1, 3); ctx.fillRect(px+11, py+3, 1, 3);
+  }
+}
+
+function drawSittingChar(px, py, name, dir) {
+  const ch = STORY.characters[name];
+  if (!ch) return;
+  ctx.fillStyle = ch.shirt; ctx.fillRect(px+4, py+4, 8, 8);
+  ctx.fillStyle = ch.legs || '#1a1a2a'; ctx.fillRect(px+3, py+12, 10, 3);
+  ctx.fillStyle = ch.skin || PAL.skin; ctx.fillRect(px+4, py-1, 8, 6);
+  ctx.fillStyle = ch.hair; ctx.fillRect(px+4, py-2, 8, 3);
+  ctx.fillRect(px+3, py-1, 2, 3); ctx.fillRect(px+11, py-1, 2, 3);
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(px+5, py+2, 2, 1); ctx.fillRect(px+9, py+2, 2, 1);
+  if (ch.glasses) {
+    ctx.fillStyle = ch.glassesColor || '#667';
+    ctx.fillRect(px+4, py+1, 8, 1);
+    ctx.fillRect(px+4, py+1, 1, 3); ctx.fillRect(px+7, py+1, 1, 3);
+    ctx.fillRect(px+8, py+1, 1, 3); ctx.fillRect(px+11, py+1, 1, 3);
+  }
+}
+
+// ─── SCENE TEXT BOX ───
+function drawSceneText(text) {
+  if (!text) return;
+  ctx.fillStyle = 'rgba(5,5,10,0.9)'; ctx.fillRect(4, H-40, W-8, 36);
+  ctx.fillStyle = PAL.text;
+  ctx.fillRect(4, H-40, W-8, 1); ctx.fillRect(4, H-4, W-8, 1);
+  ctx.fillRect(4, H-40, 1, 36); ctx.fillRect(W-5, H-40, 1, 36);
+  const maxChars = 38, words = text.split(' ');
+  let line = '', lineY = 0;
+  for (const word of words) {
+    if ((line + ' ' + word).trim().length > maxChars) {
+      drawText(line, 10, H-34+lineY*8, '#ccc', 1);
+      line = word; lineY++;
+    } else { line = (line + ' ' + word).trim(); }
+  }
+  drawText(line, 10, H-34+lineY*8, '#ccc', 1);
+  if (scenes[scene].wait && frameCount % 40 < 25) {
+    ctx.fillStyle = PAL.text; ctx.fillRect(W-14, H-10, 3, 3);
+  }
+}
+
+// ─── GAME STATE ───
+let scene = 0, sceneFrame = 0, frameCount = 0;
+let waitingForInput = false;
+let shakeX = 0, shakeY = 0, scaryMode = false;
+let flashTimer = 0, cameraFlash = 0;
+const scenes = STORY.scenes;
+
+function advanceScene() {
+  if (scene < scenes.length - 1) {
+    scene++; sceneFrame = 0; waitingForInput = false;
+    if (scenes[scene].onEnter) scenes[scene].onEnter();
+    playSound('click');
+  }
+}
+
+// ─── INPUT ───
+window.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault(); getAudio();
+    if (scenes[scene].wait && (sceneFrame > 20 || scene === 0)) advanceScene();
+  }
+});
+canvas.addEventListener('click', () => {
+  getAudio();
+  if (scenes[scene].wait && (sceneFrame > 20 || scene === 0)) advanceScene();
+});
+
+// ─── GAME LOOP ───
+function gameLoop() {
+  frameCount++; sceneFrame++;
+  if (!scenes[scene].wait && scenes[scene].duration && sceneFrame >= scenes[scene].duration) advanceScene();
+  scenes[scene].draw();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+</script>
+</body>
+</html>
